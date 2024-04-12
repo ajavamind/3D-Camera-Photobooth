@@ -1,0 +1,21 @@
+Key Command Legend page 3
+
+Align Left and Right Eye Images
+LEFT  - More negative parallax, places subject in front of the stereo window
+RIGHT - More positive parallax, places subject behind the stereo window
+UP    - Increase vertical alignment
+DOWN  - Decrease vertical alignment
+
+E - Swap left and right eye images
+
+
+
+
+
+
+
+
+
+
+
+

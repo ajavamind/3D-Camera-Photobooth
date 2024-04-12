@@ -1,0 +1,30 @@
+{	"description": "Photo Booth Configuration",
+	"debug": true,
+	"configuration": {
+		"name": "Photobooth",
+		"outputFolderPath": "C:\\Apache24\\htdocs\\data\\images",
+		"IPaddress": "192.168.1.130",
+		"mirrorScreen": true,
+		"countDownStart": 3,
+		"fileType": "jpg",
+		"eventText": "Your Photo Booth Event",
+		"instructionLineText": "^Look Here^",
+	},
+	"display": {
+		"width": 1920,
+		"height": 1080,
+	},
+    "camera": {
+    	"name" : "UVC Camera", 
+        "width": 1920,
+		"height": 1080,
+		"fps": 30,
+		"orientation": "portrait",
+		"pipelinealt": "pipeline: ksvideosrc device-index=0 ! image/jpeg ! jpegdec ! videoconvert"
+    },
+	"printer": {
+		"name": "Canon Selphy 1300",
+		"printWidth": 4.0,
+		"printHeight": 6.0,
+	}
+}

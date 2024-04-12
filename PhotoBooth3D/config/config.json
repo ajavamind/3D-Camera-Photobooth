@@ -1,0 +1,38 @@
+{	"description": "Photo Booth Configuration",
+	"debug": true,
+	"configuration": {
+		"name": "Photobooth",
+		"outputFolderPath": "C:\\Apache24\\htdocs\\data\\images",
+		"IPaddress": "192.168.0.100",
+		"mirrorScreen": true,
+		"countDownStart": 3,
+		"fileType": "jpg",
+		"eventText": "Your Photo Booth Event",
+		"instructionLineText": "^Look Here^",
+		"finalCountdownText": "Freeze!",
+	},
+	"display": {
+		"width": 1920,
+		"height": 1080,
+	},
+    "camera": {
+    	"name": "3D USB Camera #2",
+		"description": "Synchronized 3D Stereo Camera",
+		"type": "single",
+        "width": 2560,
+		"height": 960,
+		"fps": 30,
+		"orientation": "landscape",
+		"pipeline": "pipeline: ksvideosrc device-index=0 ! image/jpeg, width=2560, height=960, framerate=30/1 ! jpegdec ! videoconvert",
+		"3D_comment1": "horizontalOffset adjusts the parallax, positive or negative.",
+		"3D_comment2": "verticalOffset corrects vertical alignment of left and right image views.",
+		"3D": true,
+		"horizontalOffset": 95,
+		"verticalOffset": 0,
+    },
+	"printer": {
+		"name": "Canon Selphy 1300",
+		"printWidth": 4.0,
+		"printHeight": 6.0,
+	}
+}

@@ -1,0 +1,22 @@
+Key Command Legend page 2
+
+DEBUG:
+Tab - Show camera list and photobooth information
+Space Bar - Immediate capture no countdown
+B - Toggle SaveRaw unfiltered image from camera
+M - Toggle Mirror
+P - Portrait mode
+L - Landscape mode
+T - Screen mask for 6x4 print toggle (default)
+N - Toggle Mirror Prints
+U - Save Screenshot
+W - Print Review Photo
+[ - Start single photo capture
+] - Start 4 photo collage capture
+MULTI REMOTE CAMERA CONTROLS:
+F - Focus Hold
+R - Focus Release
+K - Take Photo and Release Focus/Shutter
+Z - Take Photo and Release Shutter only
+D - Toggle Double Trigger Mode for Multi Remote Cameras
+Y - Toggle Double Trigger Delay min 200 to max 1000 ms

@@ -1,0 +1,22 @@
+Key Command Legend page 1
+
+?/ - Toggle key command legend pages
+Enter - Start countdown capture
+Left mouse button - Start single photo capture
+ESC or Center mouse button - Toggle Review last photo
+Right mouse button - Start  capture
+S - Single photo mode
+C - Collage photo mode (frame only)
+A - Anaglyph toggle with Side by Side
+Q - Exit Photobooth
+IMAGE FILTERS:
+0 - No Filter
+1 - Grayscale
+2 - Level threshold 0.5 (positive)
+3 - Invert Level threshold 0.5 (negative)
+4 - Posterize 13
+5 - Posterize 8
+6 - Posterize 5
+7 - Posterize 4
+8 - Posterize 3
+9 - Posterize 2
