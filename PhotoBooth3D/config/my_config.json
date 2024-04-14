@@ -11,7 +11,7 @@
 		"fileType": "jpg",
 		"eventText": "3D Camera Photo Booth",
 		"instructionLineText": "^Look at Camera^",
-		"finalCountdownText": "Freeze!",
+		"finalCountdownText": "Smile!",
 	},
 	"display": {
 		"width": 1920,
