@@ -1,5 +1,5 @@
 # 3D Camera Photo Booth
-**This is my open source documentation for a 3D Camera Photo Booth demonstration project to be presented at the 2024 Maker Faire Philadelphia.**
+**This is my open source documentation for a 3D Camera Photo Booth demonstration project to be presented at the 2024 Maker Faire Philadelphia, April 21, 2024.**
 
 **Work in Progress - more information and features to be added**
 
@@ -163,7 +163,6 @@ See description of hardware and software at [https://github.com/ajavamind/Remote
 1. The myIPaddress.bat Windows batch file is a helper function to lookup the computer IP address running the photobooth application.
 
 ## Feature Enhancements 
-
 I may add some of these new features as time permits:
 
 1. Image Processor filter for green screen for background replacement
@@ -174,6 +173,25 @@ I may add some of these new features as time permits:
 6. Video storage to get a 10 second video clip in 3D
 7. Anaglyph only mode for capturing four photos into a collage during a countdown sequence
 
+## References
+I was not aware of other 3D Photo Booth projects when I started my project, but found out about a few from 3D photographers who share a passion for all things stereoscopic.
 
+### Stereomaton by Jackdesbwa3d
+   [Stereo 3D Projects](https://jackdesbwa3d.desbwa.org/projects/)
    
+  [Stereomaton First article](https://www.crowdsupply.com/virt2real/stereopi/updates/field-report-stereomaton)
+  
+  [The Stereomaton Case](https://www.crowdsupply.com/virt2real/stereopi/updates/field-report-follow-up-making-a-case-for-stereomaton)
+
+  [Stereomaton - During the event](https://www.crowdsupply.com/virt2real/stereopi/updates/field-report-follow-up-stereomaton-goes-live)
+
+  [Stereomaton Source code](https://github.com/haum/stereomaton)
+
+### Raspberry PI 3D Photo Booth by Guenter 
+RPi 3D Photo Booth was shown during ISU 2019. An article was published in DGS Stereo Journal.
+The prototype is here:
+
+https://youtu.be/kX413ehfcnM?si=1uTWRvTzJ1x_egYT
+
+
 
