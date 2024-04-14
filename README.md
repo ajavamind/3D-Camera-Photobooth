@@ -1,28 +1,41 @@
 # 3D Camera Photo Booth
 **This is my open source documentation for a 3D Camera Photo Booth demonstration project to be presented at the 2024 Maker Faire Philadelphia.**
 
-This repository contains open source code for my 3D camera photo booth [Processing](https://www.processing.org) Java sketch application that operates one 3D webcam and optionally multiple additional 2D/3D cameras. 
+**Work in Progress - more information and features to be added**
 
-This application works within a web interface framework defined in the project Photobooth on Github [https://github.com/PhotoboothProject/photobooth](https://github.com/PhotoboothProject/photobooth). The web interface framework is not a requirement of this project, but is certainly very useful for showing a gallery of images taken with a photo booth camera at a public event.
+This repository contains a description and open source code for my 3D camera photo booth project.
+[Coded with Processing](https://www.processing.org) as a Java sketch application, 
+the photo booth uses a USB 3D stereo webcam for participants live view and photo capture. 
+Optionally the photo booth can trigger additional multiple 2D/3D cameras, all triggered nearly simultaneously over a private wireless network. 
 
 ## Introduction
 
-The 3D Camera Photo Booth sketch application, written in Processing Java, takes 3D photos of subjects after a countdown sequence. 
-I wrote my photo booth camera controller using Processing so that I could experiment with various cameras and image filters.
+The 3D Camera Photo Booth sketch application takes 3D photos of subject participants after a countdown sequence. 
+I wrote my photo booth camera controller using Processing so that I could experiment with various cameras and image filters by changing the code.
 My design was influenced by another photo booth project on Github [https://github.com/arkitex/processingPhotobooth](https://github.com/arkitex/processingPhotobooth).
+This 3D photo booth is a complete rewrite with some similar structural elements. 
+I also wrote previously a 2D photo booth controller that was forked from arkitex. 
+See my 2D photo booth at this link: [https://github.com/ajavamind/processingPhotobooth](https://github.com/ajavamind/processingPhotobooth). 
+I used my 2D version of processingPhotobooth for a few family celebrations with a 4K webcam. 
+The photo booth worked out well and everyone enjoyed the experience and photos.
 
-My code is a complete rewrite with some similar structural elements. I also wrote a 2D photo booth controller that was forked from arkitex. See this link: [https://github.com/ajavamind/processingPhotobooth](https://github.com/ajavamind/processingPhotobooth). I used my 2D version of processingPhotobooth for a few family celebrations. The photo booth worked out well and everyone enjoyed the experience and photos.
-
-The photo booth application uses a synchronized twin lens 3D camera USB webcam to live view and capture photos from a video stream.
+The photo booth application uses a synchronized twin lens 3D camera USB webcam to live view and capture photos from the video stream.
 The photo booth displays captured images in either side-by-side (SBS) left and right eye view format or red-cyan Anaglyph stereo format.
 To see the images in stereo requires a stereoscope or 3D anaglyph red/cyan glasses. 
 The images can be downloaded to view with a glasses free 3D tablet.
 There is also a capability to print the SBS and Anaglyph images using a Canon SELPHY CP1300 printer.
 
-My photo booth application runs on a Windows 10/11 mini PC attached to a 1920x1080 monitor matching the 3D USB webcam single eye resolution. 
-Processing sketches can run on other systems like Apple IOS, Linux, Raspberry Pi, Android devices, and Web Browsers (with Processing P5.js). I only implemented this photo booth application for Windows version using Java. A lot of my code experience is with Java so it was my first choice for implementation. When porting a Java sketch to other systems there may be problems with using supporting libraries. Anyway there is not enough time to explore implementation on additional platforms.
+My photo booth application runs on a Windows 10/11 mini PC attached with a 1920x1080 24 inch monitor and matches the 3D USB webcam single eye view resolution. 
+Processing sketches can run on other systems like Apple IOS, Linux, Raspberry Pi, Android devices, and Web Browsers (with Processing P5.js). 
+I only implemented this photo booth application for Windows version using Java. A lot of my code experience is with Java so it was my first choice for implementation. 
+When porting a Java sketch to other systems there may be problems due to supporting libraries. There is not enough time for me to explore implementation on other platforms.
 
-A portable WiFi router establishes a small private local area WiFi network for the photo booth. The router is normally not connected to the Internet. The mini PC connects to the local network for photo transfers to other connected devices such as a notebook computer, Chromebook, mobile phones, 3D tablets. The local network also transmits broadcast messages to multiple cameras capable of receiving focus/shutter triggers using a custom camera app or an Arduino WiFi device attached to one or more cameras.
+This application works within a web interface framework defined in the project Photobooth on Github [https://github.com/PhotoboothProject/photobooth](https://github.com/PhotoboothProject/photobooth). 
+The web interface framework is not a requirement of this project, but is certainly very useful for showing a gallery of images taken with a photo booth camera at a public event.
+
+A portable WiFi router establishes a small private local area WiFi network for the photo booth. The router is normally not connected to the Internet. 
+The mini PC connects to the local network for photo transfers to other connected devices such as a notebook computer, Chromebook, mobile phones, 3D tablets. 
+The local network also transmits broadcast messages to multiple cameras capable of receiving focus/shutter triggers using a custom Android camera app or an [Arduino WiFi device](https://github.com/ajavamind/Remote-Camera-Receiver) attached to one or more cameras.
 
 Because 3D camera lenses may not be perfectly aligned the app can adjust the left and right images from the camera vertically during setup.
 The app can also adjust the photo stereo window using a horizontal parallax value to compensate for the interaxial distance between the camera lens and the subject distance from the camera.
@@ -45,14 +58,15 @@ I use a Beelink SER model Mini PC [www.bee-link.com](www.bee-link.com) with AMD 
 
 I set Windows to best performance power mode, set screen never sleeps option, screen saver after 10 minutes without keyboard or mouse input.
 It may be connected to the Internet with a CAT5 cable, but I normally do not connect the photo booth to the Internet except for code development.
+Using the Internet for emailing photos is not implemented for the project, but under consideration.
 
-### Computer Monitor 1920x1080
-I am using a LG Full HD 1080P monitor and attach the mini PC to its back. The monitor is 60 Hz with an IPS display that is good for showing photos. The monitor resolution matches the one eye view of the 3D camera. A better option might be a portable monitor with a stand, but the desktop monitor was already available. My monitor has speakers, but is not touch screen. I can see this application using a glasses free computer monitor/TV, but is too expensive for me at this time. 
+### Computer Monitor
+I am using a LG Full HD 1080P (1920x1080 pixels) 24 inch monitor and attach the mini PC to its back. The monitor is 60 Hz with an IPS display that is good for showing photos. The monitor resolution matches the one eye view of the 3D camera. A better option might be a portable monitor with a stand, but the desktop monitor was already available. My monitor has speakers, but is not touch screen. I can see this application using a glasses free computer monitor/TV, but is too expensive for me at this time. 
 
 ### WiFi Portable Router
 I use TP-Link AC750 Wi-Fi Travel Router
 to establish a local area network for the photo booth.
-It can be connected to the Internet with a CAT5 cable.
+It can be wire connected to the Internet with a CAT5 cable.
 
 ### Printer
 Canon SELPHY Printer CP1300 for 4x6 prints, connected to local WiFi network.
@@ -64,8 +78,8 @@ The Buzzer box is a repurposed Bluetooth wireless mouse. The box has 3 contact s
 2) MIDDLE button: Toggle between live view and review of last captured photo in both SBS and Anaglyph display modes.
 3) RIGHT button: Toggle between Side-by-side or Anaglyph live view display of the subject. The Anaglyph view needs red-cyan glasses for viewing stereoscopically. This mode is very helpful for giving the subject a reference about where to position themselves in relation to the stereo window.
 
-### Ring light
-The 3D webcam works best with off camera lighting. The ring light contains a camera support or as a separate light with the camera on a tripod.
+### Lighting
+The 3D webcam works best with off camera lighting. A ring light has a camera support if desired, but recently I decided to use it as a separate light and place the camera on a tripod behind the monitor.
 
 ### 3D Cameras
 3D webcams used:  
@@ -150,14 +164,14 @@ See description of hardware and software at [https://github.com/ajavamind/Remote
 
 ## Feature Enhancements 
 
-I may add some of these new features when time permits:
+I may add some of these new features as time permits:
 
 1. Image Processor filter for green screen for background replacement
 2. Camera click and Buzzer button sound generation
-3. Crop images for 8x9 aspect ratio. This aspect ratio will give a larger image when printing 4x6 cards for stereoscope viewing.
-4. Use twin 2D web cameras instead of a 3D camera. Camera left and right image synchronization will not be as good as a 3D camera.
-5. Incorporate OpenCV image processing filters.
-6. Video storage
+3. Crop images for 8x9 aspect ratio for printing stereo cards using a 4x6 printer. This aspect ratio will provide a larger image for prints viewed with a stereoscope or using the [free viewing technique](https://stereoscopy.blog/2022/03/11/learning-to-free-view-see-stereoscopic-images-with-the-naked-eye/).
+4. Use twin 2D web cameras instead of a 3D camera. Camera left and right image synchronization will not be as good as a synchronized twin lens 3D camera.
+5. Incorporate OpenCV - [Open Computer Vision](https://opencv.org/) image processing filters.
+6. Video storage to get a 10 second video clip in 3D
 7. Anaglyph only mode for capturing four photos into a collage during a countdown sequence
 
 
