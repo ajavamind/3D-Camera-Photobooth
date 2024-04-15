@@ -43,7 +43,9 @@ float timeoutFactor = 0;
 private static final int PREVIEW_OFF = -1;
 private static final int PREVIEW = 0;
 private static final int PREVIEW_ANAGLYPH = 1;
-private static final int PREVIEW_END = 1;
+private static final int PREVIEW_LEFT = 2;
+private static final int PREVIEW_RIGHT = 3;
+private static final int PREVIEW_END = 4;
 int preview = PREVIEW_OFF; // default no preview
 
 int legendPage = -1;
@@ -60,6 +62,8 @@ boolean screenMask = false;  // false default
 boolean screenshot = false;
 int screenshotCounter = 1;
 PImage windowPane;
+String printFilePath;  // Photo to print file path
+String message; // global text message for status information
 
 public void setup() {
   initConfig();  // read JSON configuration file my_config.json
@@ -234,9 +238,9 @@ public void draw() {
     } else {  // JAVA2D
       image(video, 0, 0, 0, 0);  // needed as work around issue with Capture video library buffer
       video.read();
-      camImage[nextIndex] = video.copy();
+      camImage[nextIndex] = video.copy();  // double buffering
     }
-
+    // set next buffer location
     camIndex = nextIndex;
     nextIndex++;
     nextIndex = nextIndex & 1; // alternating 2 buffers
@@ -263,6 +267,11 @@ public void draw() {
       }
     }
   }
+  // Display status message if present
+  if (message != null) {
+    drawMessage(message);
+  }
+
   if (stereoWindow) {
     // show stereo window pane
     //blend(0, 0, input.width, input.height, 0, 0, input.width, input.height, MULTIPLY);
@@ -319,7 +328,7 @@ void showCamerasList() {
 
 // Draw instruction and event text on screen
 void drawText() {
-  fill(128);
+  fill(192);
   if (preview == PREVIEW_OFF) {
     float angleText;
     float tw;
@@ -352,6 +361,18 @@ void drawText() {
       popMatrix();
     }
   }
+}
+
+// draw Status or Error Message in center of screen
+void drawMessage(String msg) {
+  //float angleText;
+  float tw;
+  fill(255);
+  pushMatrix();
+  tw = textWidth(msg);
+  translate(screenWidth/2- tw/2, screenHeight/24);
+  text(msg, 0, 0);
+  popMatrix();
 }
 
 void saveScreenshot() {
@@ -388,14 +409,26 @@ void setEXIF(String filename) {
 // calls printPhoto.bat in the sketch path
 void printPhoto(String filenamePath) {
   if (filenamePath == null) return;
+  if (DEBUG) println("process "+sketchPath() + File.separator + "printPhoto.bat "+ filenamePath);
+  printFilePath = filenamePath;
+  thread("sendPhotoToPrinter");
+}
+
+// Processing thread call, no parameters, works during draw()
+void sendPhotoToPrinter() {
+  if (DEBUG) println("sendPhotoToPrinter");
   try {
-    if (DEBUG) println("process "+sketchPath() + File.separator + "printPhoto.bat "+ filenamePath);
-    Process process = Runtime.getRuntime().exec(sketchPath()+ File.separator + "printPhoto.bat "+filenamePath);
+    Process process = Runtime.getRuntime().exec(sketchPath()+ File.separator + "printPhoto.bat "+printFilePath);
+    message = "Sending Photo to Printer";
     process.waitFor();
   }
   catch (Exception ex) {
+    if (DEBUG) println("Print Error "+ printFilePath);
   }
+  if (DEBUG) println("Print Complete");
+  message = null; // clear message
 }
+
 
 void stop() {
   if (DEBUG) println("stop");

@@ -17,6 +17,8 @@ class PhotoBoothController {
 
   String anaglyphFilename;
   String sbsFilename;
+  String leftFilename;
+  String rightFilename;
 
   boolean isPhotoShoot, endPhotoShoot;
   volatile int startPhotoShoot;
@@ -55,6 +57,14 @@ class PhotoBoothController {
       images[i] = new PImage();
     }
     collage = new PImage[4];
+  }
+
+  String getLeftFilename() {
+    return leftFilename;
+  }
+
+  String getRightFilename() {
+    return rightFilename;
   }
 
   String getAnaglyphFilename() {
@@ -117,8 +127,8 @@ class PhotoBoothController {
     if (input.width == 0) {
       OK = false;
     }
-
-    if (preview == PREVIEW_ANAGLYPH) {
+    // adjust for display
+    if (preview >= PREVIEW_ANAGLYPH) {
       h = ((float)screenWidth)/(cameraAspectRatio/2.0);
       w = (float)screenWidth;
     } else {
@@ -132,7 +142,7 @@ class PhotoBoothController {
       image(input, -screenWidth, (screenHeight-h)/2.0, w, h);
       popMatrix();
     } else {
-      if (mirror && !overrideMirror && preview == PREVIEW_ANAGLYPH) {
+      if (mirror && !overrideMirror && preview >= PREVIEW_ANAGLYPH) {
         pushMatrix();
         scale(-1, 1);
         if (screenWidth < screenHeight) {
@@ -452,7 +462,8 @@ class PhotoBoothController {
 
     // split 3D Side-by-side image into left and right images and adjust vertical and horizontal offsets
     saveSplitImage(images[SBS], outputFolderPath, outputFilename, suffix, filetype);
-    // create anaglyph image from SBS image
+
+    // create anaglyph image from left and right saved image
     PImage atemp = imageProcessor.colorAnaglyph(images[LEFT_EYE], images[RIGHT_EYE], 0, 0);
     images[ANAGLYPH] = cropForAnaglyphPrint(atemp, printAspectRatio);
     filename = outputFolderPath + File.separator + outputFilename + suffix + "_ana"+ "." + filetype;
@@ -664,10 +675,12 @@ class PhotoBoothController {
 
     filename = outputFolderPath + File.separator + outputFilename + suffix + "_l"+ "." + filetype;
     images[LEFT_EYE].save(filename);
+    leftFilename =  filename;
     right.copy(photo, w, 0, w, h, 0, 0, w, h);
     images[RIGHT_EYE] = right;
     filename = outputFolderPath + File.separator + outputFilename + suffix + "_r"+ "." + filetype;
     images[RIGHT_EYE].save(filename);
+    rightFilename = filename;
   }
 
   // Save composite collage from original photos

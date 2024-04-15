@@ -93,7 +93,12 @@ void mousePressed() {
   //if (legendPage >= 0 || showCameras|| preview != PREVIEW_OFF) return;
   if (legendPage >= 0 || showCameras) return;
   if (button == LEFT) {  // remote key A
-    lastKeyCode = KEYCODE_LEFT_BRACKET; // Single Photo capture
+    if (preview != PREVIEW_OFF) {
+      // print preview photo
+      lastKeyCode = KEYCODE_W; // print photo
+    } else {
+      lastKeyCode = KEYCODE_LEFT_BRACKET; // Single Photo capture
+    }
     if (DEBUGKEY) println("mousePressed set lastKeyCode="+lastKeyCode);
   } else if (button == CENTER) {
     lastKeyCode = KEYCODE_ESC;
@@ -232,6 +237,12 @@ int keyUpdate() {
     } else if (preview == PREVIEW_ANAGLYPH) {
       if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
       printPhoto(photoBoothController.getAnaglyphFilename());
+    } else if (preview == PREVIEW_LEFT) {
+      if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
+      printPhoto(photoBoothController.getLeftFilename());
+    } else if (preview == PREVIEW_RIGHT) {
+      if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
+      printPhoto(photoBoothController.getRightFilename());
     }
     break;
   case KEYCODE_Y:  // double trigger delay time toggle
@@ -300,8 +311,10 @@ int keyUpdate() {
 
     // toggle preview last photo or collage
     preview++;
-
-    if (preview > PREVIEW_ANAGLYPH) {
+    // skip one of single photos left or right
+    if (preview == PREVIEW_LEFT)  preview = PREVIEW_RIGHT;
+    // check for end of list
+    if (preview >= PREVIEW_END) {
       preview = PREVIEW_OFF;
     }
     if (DEBUG) println("preview="+preview);
