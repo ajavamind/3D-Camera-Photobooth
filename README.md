@@ -172,6 +172,8 @@ I may add some of these new features as time permits:
 5. Incorporate OpenCV - [Open Computer Vision](https://opencv.org/) image processing filters.
 6. Video storage to get a 10 second video clip in 3D
 7. Anaglyph only mode for capturing four photos into a collage during a countdown sequence
+8. Left/Right eye photo wiggle
+   
 
 ## References
 I was not aware of other 3D Photo Booth projects when I started my project, but found out about a few from 3D photographers who share a passion for all things stereoscopic.
