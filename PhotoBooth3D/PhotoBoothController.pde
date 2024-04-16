@@ -129,7 +129,11 @@ class PhotoBoothController {
     }
     // adjust for display
     if (preview >= PREVIEW_ANAGLYPH) {
-      h = ((float)screenWidth)/(cameraAspectRatio/2.0);
+      if (screenMask) {
+        h = ((float)screenWidth)/(9.0/8.0);
+      } else {
+        h = ((float)screenWidth)/(cameraAspectRatio/2.0);
+      }
       w = (float)screenWidth;
     } else {
       h = ((float)screenWidth)/(cameraAspectRatio);
@@ -410,9 +414,9 @@ class PhotoBoothController {
     if (camera3D) {
       if (DEBUG) println("save filter "+ imageProcessor.filterNum + " or offset photo "+ (currentState+1) + " " + datetime);
       if (anaglyph) {
-        save3DImage(currentRawImage, currentState, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
+        save3DImage(currentRawImage, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
       } else {
-        save3DImage(currentImage, currentState, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
+        save3DImage(currentImage, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
       }
     } else {
       if (DEBUG) println("save 2D photo "+ (currentState+1) + " " + datetime);
@@ -448,45 +452,53 @@ class PhotoBoothController {
   }
 
   // save images from 3D cameras
-  public void save3DImage(PImage img, int index, String outputFolderPath, String outputFilename, String suffix, String filetype) {
+  public void save3DImage(PImage img, String outputFolderPath, String outputFilename, String suffix, String filetype) {
     String filename;
     if (DEBUG) println("save3DImage ");
-    images[index] = mirror3D(img, mirror);
+
+    images[SBS] = mirror3D(img, mirror);
     filename = outputFolderPath + File.separator + outputFilename + suffix + "_2x1"+ "." + filetype;
-    images[index] = imageProcessor.alignSBS(images[index], horizontalOffset, verticalOffset, mirror);
-    images[index].save(filename);
+    images[SBS] = imageProcessor.alignSBS(images[SBS], horizontalOffset, verticalOffset, mirror);
+    if (screenMask) {
+      images[SBS] = cropForMaskPrint(images[SBS], printAspectRatio);
+    }
+    images[SBS].save(filename);  // save SBS image
     sbsFilename = filename;
-    //filename = outputFolderPath + File.separator + outputFilename + suffix +"_"+ number(index+1) +
-    //  "_"+int(printWidth)+"x"+int(printHeight)+ "." + "png";
-    //save3Dprint(images[index], printAspectRatio, filename);
 
     // split 3D Side-by-side image into left and right images and adjust vertical and horizontal offsets
     saveSplitImage(images[SBS], outputFolderPath, outputFilename, suffix, filetype);
 
     // create anaglyph image from left and right saved image
-    PImage atemp = imageProcessor.colorAnaglyph(images[LEFT_EYE], images[RIGHT_EYE], 0, 0);
-    images[ANAGLYPH] = cropForAnaglyphPrint(atemp, printAspectRatio);
+    images[ANAGLYPH] = imageProcessor.colorAnaglyph(images[LEFT_EYE], images[RIGHT_EYE], 0, 0);
     filename = outputFolderPath + File.separator + outputFilename + suffix + "_ana"+ "." + filetype;
     images[ANAGLYPH].save(filename);
     anaglyphFilename = filename;
   }
 
-  // crop for anaglyph printing
-  PImage cropForAnaglyphPrint(PImage src, float printAspectRatio) {
-    if (DEBUG) println("cropForAnaglyphPrint "+printAspectRatio);
-    if (screenMask == false) return src;
-    // first crop creating a new PImage
-    float bw = (src.width-(src.height/printAspectRatio))/2.0;
-    int sx = int(bw);
+  // crop for mask printing
+  PImage cropForMaskPrint(PImage src, float printAspectRatio) {
+    if (DEBUG) println("cropForMaskPrint print AR="+printAspectRatio);
+    if (DEBUG) println("cropForMaskPrint image width="+src.width + " height="+src.height);
+    float AR = 8.0/9.0;  // crop aspect ratio
+    // create a new PImage
+    float bw = (src.width-(src.height/AR/2.0))/2.0; // pixel width for one eye view
+    if (DEBUG) println("bw="+bw);
+    int iw = int(bw/2);
+    int sx = ((src.width/2)-iw)/2;
     int sy = 0;
-    int sw = src.width-int(2*bw);
+    int sw = iw;
     int sh = src.height;
     int dx = 0;
     int dy = 0;
     int dw = sw;
     int dh = src.height;
-    PImage img = createImage(dw, dh, RGB);
-    img.copy(src, sx, sy, sw, sh, dx, dy, dw, dh);  // cropped copy
+    PImage img = createImage(2*dw, dh, RGB);
+    if (DEBUG) println(" sx="+sx+" sy="+sy+" sw="+sw+" sh="+sh +" dx="+dx+" dy="+dy+" dw="+dw+" dh="+dh);
+    img.copy(src, sx, sy, sw, sh, dx, dy, dw, dh);  // cropped left eye copy
+    sx = sx + src.width/2;
+    dx = dx + iw;
+    if (DEBUG) println(" sx="+sx+" sy="+sy+" sw="+sw+" sh="+sh +" dx="+dx+" dy="+dy+" dw="+dw+" dh="+dh);
+    img.copy(src, sx, sy, sw, sh, dx, dy, dw, dh);  // cropped right eye copy
     return img;
   }
 
@@ -645,7 +657,8 @@ class PhotoBoothController {
     float y = 0;
     float w = 0;
     float h = 0;
-    w = (screenWidth-(screenHeight/printAspectRatio))/2.0;
+    w = (screenWidth-(screenHeight/printAspectRatio/2.0))/2.0;
+
     h = screenHeight;
     if (anaglyph) {
       rect(x, y, w, h);  // left side
