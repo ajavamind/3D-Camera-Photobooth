@@ -78,7 +78,7 @@ void initConfig() {
   if (buildMode == JAVA_MODE) {
     readConfig();
   } else if (buildMode == ANDROID_MODE) {
-    //readAConfig();  // TODO call different configuration function
+    //readAConfig();  // TODO call different configuration function for Android
   }
 }
 

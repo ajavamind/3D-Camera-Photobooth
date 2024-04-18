@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
 
-private static final boolean DEBUG = true;
+private static final boolean DEBUG = false;
 private static final boolean DEBUGKEY = false;
 private static final boolean DEBUG_ONSCREEN = false;
 String VERSION = "3D 2.0";
@@ -37,8 +37,7 @@ String RENDERER = JAVA2D; // default recommended RENDERER to avoid unresolved Op
 //String RENDERER = P3D; // a OpenJDK Java memory exception bug in OpenGL video library prevents this render mode from working with filters
 
 float FRAME_RATE = 30;
-float delayFactor = 0;
-float timeoutFactor = 0;
+int countInterval = 16;
 
 private static final int PREVIEW_OFF = -1;
 private static final int PREVIEW = 0;
@@ -94,13 +93,13 @@ public void setup() {
   textSize(fontSize);
   largeFontSize = 6*fontSize;
 
+  // read legend files for display
   legend1 = loadStrings("keyLegend.txt");
   legend2 = loadStrings("keyLegend2.txt");
   legend3 = loadStrings("keyLegend3.txt");
   legend = new String[][] { legend1, legend2, legend3};
 
   if (OUTPUT_FOLDER_PATH.equals("output")) {  // default folder name
-    //OUTPUT_FOLDER_PATH = sketchPath() + File.separator + "output";
     OUTPUT_FOLDER_PATH = sketchPath("output");
   }
   if (DEBUG) println("OUTPUT_FOLDER_PATH="+OUTPUT_FOLDER_PATH);
@@ -176,22 +175,20 @@ public void setup() {
     try {
       if (RENDERER.equals(P2D) || RENDERER.equals(P3D)) {
         ((com.jogamp.newt.opengl.GLWindow) surface.getNative()).requestFocus();  // for P2D
-        delayFactor = 1.5;
-        timeoutFactor = 1;
+        countInterval = 2*16;
       } else {
         ((java.awt.Canvas) surface.getNative()).requestFocus();  // for JAVA2D (default)
-        delayFactor = .66;
-        timeoutFactor = 3;
+        countInterval = 16;
       }
     }
     catch (Exception ren) {
       println("Renderer: "+RENDERER+ " Window focus exception: " + ren.toString());
     }
   }
-  photoBoothController.setTimeouts(delayFactor, timeoutFactor);
+  // set count down Interval
+  photoBoothController.setCountInterval(countInterval, countdownStart);
   surface.setTitle(titleText);
   if (DEBUG) println("Renderer: "+RENDERER);
-  if (DEBUG) println("delayFactor = "+delayFactor+" timeoutFactor="+timeoutFactor);
   if (DEBUG) println("finished setup()");
 }
 
@@ -253,7 +250,6 @@ public void draw() {
       photoBoothController.drawLast();
     } else {
       photoBoothController.processImage(camImage[camIndex]);
-      //photoBoothController.processImage(video);
     }
     drawText();  //  TODO make PGraphic
     if (photoBoothController.isPhotoShoot) {

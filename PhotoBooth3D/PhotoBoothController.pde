@@ -23,9 +23,10 @@ class PhotoBoothController {
   boolean isPhotoShoot, endPhotoShoot;
   volatile int startPhotoShoot;
   volatile boolean noCountDown = false;
-  int photoDelay = int(delayFactor*FRAME_RATE);
-  int oldShootTimeout = int(timeoutFactor*FRAME_RATE);
+  int countInterval = 16;
+  int oldShootTimeout = 4*countInterval; 
   int oldShoot = 0;
+  int countdownStart = 3;
 
   int MAX_PANELS = 4; // 4 panels will only show anaglyph images not tested
   int PANEL_WIDTH;
@@ -75,9 +76,12 @@ class PhotoBoothController {
     return sbsFilename;
   }
 
-  void setTimeouts(float delayFactor, float timeoutFactor) {
-    photoDelay = int(delayFactor*FRAME_RATE);
-    oldShootTimeout = int(timeoutFactor*FRAME_RATE);
+  // initialize counters for the controller
+  void setCountInterval(int interval, int start) {
+    countInterval = interval;
+    oldShootTimeout = 4*countInterval; 
+    oldShoot = 0;
+    countdownStart = start;
   }
 
   void updatePanelSize() {
@@ -268,9 +272,10 @@ class PhotoBoothController {
     drawPrevious();
   }
 
+  // draw photo shoot count down digits
   public void drawPhotoShoot() {
     background(0);
-    int digit = getCountDownDigit(countdownStart);
+    int digit = getCountDownDigit(countdownStart, countInterval);
     if (digit > 0 && !endPhotoShoot) {
       drawCurrent();
       fill(0x80FFFF80);
@@ -320,7 +325,6 @@ class PhotoBoothController {
       takePhoto(doubleTrigger, false);  // take photo
       boolean done = incrementState();
       if (done) {
-        if (DEBUG) println("done drawPrevious()");
         drawPrevious();
         String saved = "Saved "+datetime;
         float tw = textWidth(saved);
@@ -363,12 +367,13 @@ class PhotoBoothController {
     }
   }
 
-  int getCountDownDigit(int initial) {
-    int cdd = -1;
+  int getCountDownDigit(int initial, int photoDelay) {
+    int cdd = -1; // count down digit value
     int aDelay = photoDelay/4;
-    if (numberOfPanels == 4) {
+    if (numberOfPanels == 4) {  // not tested
       aDelay = photoDelay/4;
     }
+    if (!anaglyph) aDelay = photoDelay/2; // anaglyph processing slows down count, so compensate
     if (startPhotoShoot < aDelay) {
       cdd = initial;
     } else if (startPhotoShoot >= aDelay && startPhotoShoot < 2*aDelay) {
@@ -385,7 +390,7 @@ class PhotoBoothController {
       startPhotoShoot = 4*aDelay;
       cdd = initial-3;
     }
-    if (DEBUG) println("countDownCounter="+cdd);
+    if (DEBUG) println("countDownCounter="+cdd + " aDelay="+aDelay + " startPhotoShoot="+startPhotoShoot);
     return cdd;
   }
 
