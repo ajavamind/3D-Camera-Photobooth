@@ -13,7 +13,7 @@ Optionally the photo booth can trigger additional multiple 2D/3D cameras, all tr
 My 3D Photo Booth project is a camera system that people can use to take instant 3D portrait or group photos that give the illusion of depth. 
 It offers a fun activity for family parties and gatherings.
 
-This booth uses a twin lens webcam to show a live 3D image. 
+This booth uses a twin lens webcam to show a live view mirrored 3D image. 
 You can view the 3D image depth in two ways:  with a stereoscope viewer, which lets you see the image in 3D. The second way is by wearing special Red-Cyan glasses. 
 
 When you press a start button, the booth counts down and then takes a 3D photo. You then review your photo in three different ways:
