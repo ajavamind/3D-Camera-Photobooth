@@ -1,17 +1,41 @@
 # 3D Camera Photo Booth
 **This is my open source documentation for a 3D Camera Photo Booth demonstration project to be presented at the 2024 Maker Faire Philadelphia, April 21, 2024.**
 
-**Work in Progress - more information and features to be added**
+**Work in Progress - more information and feature refinements to be added**
 
 This repository contains a description and open source code for my 3D camera photo booth project.
 [Coded with Processing](https://www.processing.org) as a Java sketch application, 
 the photo booth uses a USB 3D stereo webcam for participants live view and photo capture. 
 Optionally the photo booth can trigger additional multiple 2D/3D cameras, all triggered nearly simultaneously over a private wireless network. 
 
+## Summary
+
+My 3D Photo Booth project is a camera system that people can use to take instant 3D portrait or group photos that give the illusion of depth. 
+It offers a fun activity for family parties and gatherings.
+
+This booth uses a twin lens webcam to show a live 3D image. 
+You can view the 3D image depth in two ways:  with a stereoscope viewer, which lets you see the image in 3D. The second way is by wearing special Red-Cyan glasses. 
+
+When you press a start button, the booth counts down and then takes a 3D photo. You then review your photo in three different ways:
+1. Looking through a stereoscope.
+2. Wearing Red-Cyan glasses.  
+3. As a regular 2D photo.
+
+You can view and print these photos at the booth or with a laptop connected to the photo booth. 
+Photos can be seen as a slide show on the laptop. 
+I can also transfer the photo to a glasses free 3D tablet for viewing. 
+
+A local WiFi network lets all these devices get the 3D photos from the booth's computer and also supports taking additional photos simultaneously with multiple cameras .
+
+My 3D photo booth software is open source and written as a Processing sketch in the Java language. 
+Processing helps students learn how to code and create visual art. Many students, artists, designers, researchers, and hobbyists make prototypes with it. 
+
+For more information about Processing, you can visit this website: [https://processing.org](https://processing.org).
+
 ## Introduction
 
 The 3D Camera Photo Booth sketch application takes 3D photos of subject participants after a countdown sequence. 
-I wrote my photo booth camera controller using Processing so that I could experiment with various cameras and image filters by changing the code.
+I wrote my photo booth camera controller using Processing so that I could experiment with various cameras, image filters, and display devices.
 My design was influenced by another photo booth project on Github [https://github.com/arkitex/processingPhotobooth](https://github.com/arkitex/processingPhotobooth).
 This 3D photo booth is a complete rewrite with some similar structural elements. 
 I also wrote previously a 2D photo booth controller that was forked from arkitex. 
