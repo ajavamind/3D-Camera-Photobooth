@@ -147,11 +147,14 @@ int keyUpdate() {
     exit();
     break;
   case KEYCODE_ENTER:
-    preview = PREVIEW_OFF;
-    if (!photoBoothController.isPhotoShoot) {
-      photoBoothController.tryPhotoShoot();
+    if (preview == PREVIEW_OFF) {
+      if (!(legendPage >= 0 || showCameras)) {
+      if (!photoBoothController.isPhotoShoot) {
+        photoBoothController.tryPhotoShoot();
+      }
+      cmd = ENTER;
+      }
     }
-    cmd = ENTER;
     break;
   case LEFT: // 3D camera adjust parallax
     horizontalOffset--;

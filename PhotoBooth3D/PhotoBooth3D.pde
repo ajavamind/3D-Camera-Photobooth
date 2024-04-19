@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
 
-private static final boolean DEBUG = false;
+private static final boolean DEBUG = true;
 private static final boolean DEBUGKEY = false;
 private static final boolean DEBUG_ONSCREEN = false;
 String VERSION = "3D 2.0";
@@ -20,8 +20,8 @@ String VERSION = "3D 2.0";
 Capture video;
 private final static int NUM_BUFFERS = 2;
 volatile PImage[] camImage = new PImage[NUM_BUFFERS];
-volatile int camIndex = 0;
-volatile int nextIndex = 1;
+volatile int camIndex = 0;  // current buffer index
+volatile int nextIndex = 1; // next buffer index
 
 PFont font;
 int fontSize;
@@ -57,12 +57,14 @@ String[][] legend;
 String[] cameras = null;
 int cameraIndex = 0;
 boolean showCameras = false;
-boolean screenMask = false;  // false default
+boolean screenMask = false;  // false default - feature used for cropping SBS for printing stereo card
 boolean screenshot = false;
 int screenshotCounter = 1;
+boolean printing = false;
 PImage windowPane;
 String printFilePath;  // Photo to print file path
 String message; // global text message for status information
+int messageTimeout;  // number of frames
 
 public void setup() {
   initConfig();  // read JSON configuration file my_config.json
@@ -263,10 +265,9 @@ public void draw() {
       }
     }
   }
+
   // Display status message if present
-  if (message != null) {
-    drawMessage(message);
-  }
+  drawMessage();
 
   if (stereoWindow) {
     // show stereo window pane
@@ -340,7 +341,14 @@ void drawText() {
       translate(screenWidth/2- tw/2, screenHeight-screenHeight/32);
       text(eventText, 0, 0);
       popMatrix();
-    } else {
+      if (screenMask) {
+        pushMatrix();
+        tw = textWidth(featureText);
+        translate(screenWidth/2- tw/2, screenHeight-screenHeight/16-10);
+        text(featureText, 0, 0);
+        popMatrix();
+      }
+    } else {  // portrait mode not used yet
       angleText = radians(270);
       tw = textWidth(instructionLineText);
       pushMatrix();
@@ -359,16 +367,27 @@ void drawText() {
   }
 }
 
+void setMessage(String msg, int seconds) {
+  message = msg;
+  messageTimeout = seconds * (int) frameRate;
+}
+
 // draw Status or Error Message in center of screen
-void drawMessage(String msg) {
+int drawMessage() {
+  if (messageTimeout <= 0 ) {
+    message = null;
+    return messageTimeout;
+  }
   //float angleText;
   float tw;
   fill(255);
   pushMatrix();
-  tw = textWidth(msg);
+  tw = textWidth(message);
   translate(screenWidth/2- tw/2, screenHeight/24);
-  text(msg, 0, 0);
+  text(message, 0, 0);
   popMatrix();
+  messageTimeout--;
+  return messageTimeout;
 }
 
 void saveScreenshot() {
@@ -412,17 +431,22 @@ void printPhoto(String filenamePath) {
 
 // Processing thread call, no parameters, works during draw()
 void sendPhotoToPrinter() {
+  if (messageTimeout == 0) {
+    printing = false;
+  }
+  if (printing) return;
+  printing = true;
   if (DEBUG) println("sendPhotoToPrinter");
   try {
     Process process = Runtime.getRuntime().exec(sketchPath()+ File.separator + "printPhoto.bat "+printFilePath);
-    message = "Sending Photo to Printer";
+    setMessage("Sending Photo to Printer", 6);
     process.waitFor();
   }
   catch (Exception ex) {
     if (DEBUG) println("Print Error "+ printFilePath);
   }
   if (DEBUG) println("Print Complete");
-  message = null; // clear message
+  //message = null; // clear message
 }
 
 

@@ -24,7 +24,7 @@ class PhotoBoothController {
   volatile int startPhotoShoot;
   volatile boolean noCountDown = false;
   int countInterval = 16;
-  int oldShootTimeout = 4*countInterval; 
+  int oldShootTimeout = 4*countInterval;
   int oldShoot = 0;
   int countdownStart = 3;
 
@@ -79,7 +79,7 @@ class PhotoBoothController {
   // initialize counters for the controller
   void setCountInterval(int interval, int start) {
     countInterval = interval;
-    oldShootTimeout = 4*countInterval; 
+    oldShootTimeout = 4*countInterval;
     oldShoot = 0;
     countdownStart = start;
   }
@@ -125,42 +125,54 @@ class PhotoBoothController {
   }
 
   private void draw3DImage(PImage input, int preview, boolean overrideMirror) {
-    float h ;
-    float w;
+    float h = 0;
+    float w = 0;
+    float hOffset = 0;
     boolean OK = true;
     if (input.width == 0) {
       OK = false;
     }
     // adjust for display
-    if (preview >= PREVIEW_ANAGLYPH) {
-      if (screenMask) {
-        h = ((float)screenWidth)/(9.0/8.0);
-      } else {
+    if (screenMask) {
+      if (preview == PREVIEW) {
         h = ((float)screenWidth)/(cameraAspectRatio/2.0);
+        w = (float)screenWidth;
+      } else if (preview >= PREVIEW_ANAGLYPH) {
+        h = ((float)screenHeight);
+        w = (float)screenHeight*((float)input.width/(float)input.height);
+        hOffset = ((float)screenWidth - w)/2.0;
+      } else {
+        h = ((float)screenWidth)/(cameraAspectRatio);
+        w = (float)screenWidth;
+        hOffset = ((float)screenWidth - w)/2.0;
       }
-      w = (float)screenWidth;
     } else {
-      h = ((float)screenWidth)/(cameraAspectRatio);
-      w = (float)screenWidth;
+      if (preview >= PREVIEW_ANAGLYPH) {
+        h = ((float)screenWidth)/(cameraAspectRatio/2.0);
+        w = (float)screenWidth;
+      } else {
+        h = ((float)screenWidth)/(cameraAspectRatio);
+        w = (float)screenWidth;
+      }
     }
     background(0);
     if (mirror && !overrideMirror && preview == PREVIEW_OFF) {
       pushMatrix();
       scale(-1, 1);
-      image(input, -screenWidth, (screenHeight-h)/2.0, w, h);
+      image(input, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
       popMatrix();
     } else {
       if (mirror && !overrideMirror && preview >= PREVIEW_ANAGLYPH) {
         pushMatrix();
         scale(-1, 1);
         if (screenWidth < screenHeight) {
-          image(input, -screenWidth, (screenHeight-h)/2.0, w, h);
+          image(input, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
         } else {
-          image(input, -screenWidth, (screenHeight-h), w, h);
+          image(input, -screenWidth+hOffset, (screenHeight-h), w, h);
         }
         popMatrix();
       } else {
-        image(input, 0, (screenHeight-h)/2.0, w, h);
+        image(input, hOffset, (screenHeight-h)/2.0, w, h);
       }
     }
     if (DEBUG_ONSCREEN) {
@@ -178,7 +190,7 @@ class PhotoBoothController {
   public void drawPrevious() {
     if (DEBUG) println("drawPrevious() currentState="+currentState);
     if (camera3D) {
-      draw3DImage(images[currentState], PREVIEW_OFF, true);
+      draw3DImage(images[currentState], PREVIEW, true);
     } else {
       drawImage(images[currentState], true);
     }
@@ -350,7 +362,7 @@ class PhotoBoothController {
           pg.dispose();
           drawCollage(collage2x2);
         }
-        drawMask();
+        //drawMask();
       }
       startPhotoShoot=0;
     }
@@ -484,9 +496,10 @@ class PhotoBoothController {
   PImage cropForMaskPrint(PImage src, float printAspectRatio) {
     if (DEBUG) println("cropForMaskPrint print AR="+printAspectRatio);
     if (DEBUG) println("cropForMaskPrint image width="+src.width + " height="+src.height);
-    float AR = 8.0/9.0;  // crop aspect ratio
+    float AR = printAspectRatio; //8.0/9.0;  // crop aspect ratio
     // create a new PImage
-    float bw = (src.width-(src.height/AR/2.0))/2.0; // pixel width for one eye view
+    //float bw = (src.height/AR); // pixel width for one eye view
+    float bw = (300*6); // pixel width for printer at 300 dpi
     if (DEBUG) println("bw="+bw);
     int iw = int(bw/2);
     int sx = ((src.width/2)-iw)/2;
@@ -662,9 +675,10 @@ class PhotoBoothController {
     float y = 0;
     float w = 0;
     float h = 0;
-    w = (screenWidth-(screenHeight/printAspectRatio/2.0))/2.0;
-
+    w = (screenWidth-(screenHeight/printAspectRatio)/2.0)/2.0;
     h = screenHeight;
+    //println("w="+w+" h="+h);
+
     if (anaglyph) {
       rect(x, y, w, h);  // left side
       rect(screenWidth-w, y, w, h);  // right side

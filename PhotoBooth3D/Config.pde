@@ -26,6 +26,7 @@ int verticalOffset = 0;
 
 String eventText;
 String instructionLineText;
+String featureText = "Crop For Stereo Card Print";
 String finalCountdownText = "Freeze!";
 
 String titleText="3D Photo Booth";
