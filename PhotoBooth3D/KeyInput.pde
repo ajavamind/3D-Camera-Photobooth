@@ -90,11 +90,11 @@ void mousePressed() {
   if (DEBUGKEY) println("mousePressed()");
   if (DEBUGKEY) println("mouseButton="+mouseButton + " LEFT=" + LEFT + " RIGHT="+RIGHT+" CENTER="+CENTER);
   // ignore mouse keys when showing screen other than the camera image
-  //if (legendPage >= 0 || showCameras|| preview != PREVIEW_OFF) return;
+  //if (legendPage >= 0 || showCameras|| review > LIVEVIEW) return;
   if (legendPage >= 0 || showCameras) return;
   if (button == LEFT) {  // remote key A
-    if (preview != PREVIEW_OFF) {
-      // print preview photo
+    if (review >= REVIEW && review < REVIEW_END) {
+      // print review photo
       lastKeyCode = KEYCODE_W; // print photo
     } else {
       lastKeyCode = KEYCODE_LEFT_BRACKET; // Single Photo capture
@@ -147,12 +147,12 @@ int keyUpdate() {
     exit();
     break;
   case KEYCODE_ENTER:
-    if (preview == PREVIEW_OFF) {
+    if (review <= LIVEVIEW) {
       if (!(legendPage >= 0 || showCameras)) {
-      if (!photoBoothController.isPhotoShoot) {
-        photoBoothController.tryPhotoShoot();
-      }
-      cmd = ENTER;
+        if (!photoBoothController.isPhotoShoot) {
+          photoBoothController.tryPhotoShoot();
+        }
+        cmd = ENTER;
       }
     }
     break;
@@ -222,28 +222,28 @@ int keyUpdate() {
     mirrorPrint = !mirrorPrint;
     if (DEBUG) println("mirrorPrint="+mirrorPrint);
     break;
-  case KEYCODE_C:
-    preview = PREVIEW_OFF;
+  case KEYCODE_C:  // collage 2D
+    review = setLiveview();
     set2x2Photo();
     break;
-  case KEYCODE_S:
-    preview = PREVIEW_OFF;
+  case KEYCODE_S:  // single photo 2D
+    review = setLiveview();
     setSinglePhoto();
     break;
   case KEYCODE_U:  // save screenshot file
     screenshot = true;
     break;
-  case KEYCODE_W:  // print file photo, must be in preview mode
-    if (preview == PREVIEW) {
+  case KEYCODE_W:  // print file photo, must be in review mode
+    if (review == REVIEW) {
       if (DEBUG) println("print "+ photoBoothController.getSbsFilename());
       printPhoto(photoBoothController.getSbsFilename());
-    } else if (preview == PREVIEW_ANAGLYPH) {
+    } else if (review == REVIEW_ANAGLYPH) {
       if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
       printPhoto(photoBoothController.getAnaglyphFilename());
-    } else if (preview == PREVIEW_LEFT) {
+    } else if (review == REVIEW_LEFT) {
       if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
       printPhoto(photoBoothController.getLeftFilename());
-    } else if (preview == PREVIEW_RIGHT) {
+    } else if (review == REVIEW_RIGHT) {
       if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
       printPhoto(photoBoothController.getRightFilename());
     }
@@ -255,16 +255,16 @@ int keyUpdate() {
       doubleTriggerDelay = doubleTriggerDelayMin;
     }
     break;
-  case KEYCODE_LEFT_BRACKET:
-    preview = PREVIEW_OFF;
+  case KEYCODE_LEFT_BRACKET:  // single photo 2D
+    review = setLiveview();
     setSinglePhoto();
     if (!photoBoothController.isPhotoShoot) {
       photoBoothController.tryPhotoShoot();
     }
     cmd = ENTER;
     break;
-  case KEYCODE_RIGHT_BRACKET:
-    preview = PREVIEW_OFF;
+  case KEYCODE_RIGHT_BRACKET: // single photo 2D
+    review = setLiveview();
     if (camera3D) {
       setSinglePhoto();
     } else {
@@ -284,14 +284,19 @@ int keyUpdate() {
     if (DEBUG) println("orientation="+(orientation==LANDSCAPE? "Landscape":"Portrait"));
     break;
   case KEYCODE_T: // toggle mask
-    screenMask = ! screenMask;
+    if (review <= LIVEVIEW) { // change during live view only
+      if (format == PARALLEL)
+        format = STEREO_CARD;
+      else
+        format = PARALLEL;
+    }
     break;
   case KEYCODE_TAB:
     showCameras = ! showCameras;
     break;
   case KEYCODE_QUESTION_MARK:
-    preview = PREVIEW_OFF;
-    if (DEBUG) println("preview=OFF "+preview);
+    review = setLiveview();
+    if (DEBUG) println("review=OFF "+review);
     legendPage++;
     if (legendPage >= LEGENDS) {
       legendPage = -1;
@@ -301,26 +306,32 @@ int keyUpdate() {
     // Immediate capture not countdown
     photoBoothController.noCountDown = true;
     //focusPush();  // trigger Focus
-    preview = PREVIEW_OFF;
+    review = setLiveview();
     if (!photoBoothController.isPhotoShoot) {
       photoBoothController.tryPhotoShoot();
     }
     cmd = ENTER;
     break;
   case KEYCODE_ESC:
-    if (!photoBoothController.hasPreview()) {
-      preview++;
-    }
+    if (photoBoothController.hasPreview()) {
+      if (review <= LIVEVIEW)
+        review = REVIEW;
+      else
+        // toggle review last photo or collage
+        review++;
 
-    // toggle preview last photo or collage
-    preview++;
-    // skip one of single photos left or right
-    if (preview == PREVIEW_LEFT)  preview = PREVIEW_RIGHT;
-    // check for end of list
-    if (preview >= PREVIEW_END) {
-      preview = PREVIEW_OFF;
+      // skip one of single photos left or right
+      if (review == REVIEW_LEFT)  review = REVIEW_RIGHT;
+      // check for end of list
+      if (review >= REVIEW_END) {
+        review = setLiveview();
+      }
+      //if (DEBUG) println("review="+review);
+    } else {
+      //println("no image for preview");
+      setMessage("NO IMAGES", 3);
+      review = setLiveview();
     }
-    if (DEBUG) println("preview="+preview);
     break;
   case KEYCODE_D: // toggle multi camera double trigger
     doubleTrigger = !doubleTrigger;
@@ -334,6 +345,15 @@ int keyUpdate() {
   lastKeyCode = 0;
   return cmd;
 }
+
+int setLiveview() {
+  if (anaglyph)
+    return LIVEVIEW_ANAGLYPH;
+  else
+    return LIVEVIEW;
+}
+
+
 
 // Single Photo mode
 boolean setSinglePhoto() {

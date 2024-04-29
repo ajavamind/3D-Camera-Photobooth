@@ -15,7 +15,7 @@ import java.util.Locale;
 private static final boolean DEBUG = true;
 private static final boolean DEBUGKEY = false;
 private static final boolean DEBUG_ONSCREEN = false;
-String VERSION = "3D 2.0";
+String VERSION = "3D 2.1";
 
 Capture video;
 private final static int NUM_BUFFERS = 2;
@@ -39,13 +39,20 @@ String RENDERER = JAVA2D; // default recommended RENDERER to avoid unresolved Op
 float FRAME_RATE = 30;
 int countInterval = 16;
 
-private static final int PREVIEW_OFF = -1;
-private static final int PREVIEW = 0;
-private static final int PREVIEW_ANAGLYPH = 1;
-private static final int PREVIEW_LEFT = 2;
-private static final int PREVIEW_RIGHT = 3;
-private static final int PREVIEW_END = 4;
-int preview = PREVIEW_OFF; // default no preview
+// Index values used for review variable
+private static final int LIVEVIEW_ANAGLYPH = -2;  // live view Anaglyph index
+private static final int LIVEVIEW = -1;  // live view SBS parallel index
+private static final int REVIEW = 0; // saved SBS image index
+private static final int REVIEW_ANAGLYPH = 1;  // saved Anaglyph image index
+private static final int REVIEW_LEFT = 2; // saved left image index
+private static final int REVIEW_RIGHT = 3; // saved right image index
+private static final int REVIEW_END = 4; // outside saved image index
+int review = LIVEVIEW; // default no review available yet, live view SBS
+
+// 3D output for stereo card format 6x4 print
+private static final int PARALLEL = 0;  // SBS 3D
+private static final int STEREO_CARD = 1; // Stereo card for stereoscope viewing
+int format = PARALLEL;  // default - feature used for cropping SBS for printing stereo card
 
 int legendPage = -1;
 int LEGENDS = 3;
@@ -57,7 +64,6 @@ String[][] legend;
 String[] cameras = null;
 int cameraIndex = 0;
 boolean showCameras = false;
-boolean screenMask = false;  // false default - feature used for cropping SBS for printing stereo card
 boolean screenshot = false;
 int screenshotCounter = 1;
 boolean printing = false;
@@ -248,7 +254,7 @@ public void draw() {
   if (photoBoothController.endPhotoShoot) {
     photoBoothController.oldShoot(); // show result
   } else {
-    if (preview != PREVIEW_OFF) {
+    if (review > LIVEVIEW) {
       photoBoothController.drawLast();
     } else {
       photoBoothController.processImage(camImage[camIndex]);
@@ -326,7 +332,7 @@ void showCamerasList() {
 // Draw instruction and event text on screen
 void drawText() {
   fill(192);
-  if (preview == PREVIEW_OFF) {
+  if (review <= LIVEVIEW) {
     float angleText;
     float tw;
     if (orientation == LANDSCAPE) {
@@ -341,7 +347,7 @@ void drawText() {
       translate(screenWidth/2- tw/2, screenHeight-screenHeight/32);
       text(eventText, 0, 0);
       popMatrix();
-      if (screenMask) {
+      if (format == STEREO_CARD) {
         pushMatrix();
         tw = textWidth(featureText);
         translate(screenWidth/2- tw/2, screenHeight-screenHeight/16-10);
@@ -383,7 +389,7 @@ int drawMessage() {
   fill(255);
   pushMatrix();
   tw = textWidth(message);
-  translate(screenWidth/2- tw/2, screenHeight/24);
+  translate(screenWidth/2- tw/2, screenHeight/12);
   text(message, 0, 0);
   popMatrix();
   messageTimeout--;

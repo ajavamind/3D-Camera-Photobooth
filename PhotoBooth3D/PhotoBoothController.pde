@@ -118,79 +118,199 @@ class PhotoBoothController {
   }
 
   public boolean hasPreview() {
-    if (images[PREVIEW].width == 0) {
+    if (images[REVIEW] != null && images[REVIEW].width == 0) {
       return false;
     }
     return true;
   }
 
-  private void draw3DImage(PImage input, int preview, boolean overrideMirror) {
+  private void draw3DImage(PImage img, int review, boolean overrideMirror) {
+    float hImg= img.height;
+    float wImg = img.width;
+    float arImg = wImg/hImg;  // aspect ratio of image
+    float hScreen = (float) screenHeight;
+    float wScreen = (float) screenWidth;
     float h = 0;
     float w = 0;
     float hOffset = 0;
     boolean OK = true;
-    if (input.width == 0) {
+    if (img.width == 0) {
       OK = false;
     }
     // adjust for display
-    if (screenMask) {
-      if (preview == PREVIEW) {
-        h = ((float)screenWidth)/(cameraAspectRatio/2.0);
-        w = (float)screenWidth;
-      } else if (preview >= PREVIEW_ANAGLYPH) {
-        h = ((float)screenHeight);
-        w = (float)screenHeight*((float)input.width/(float)input.height);
-        hOffset = ((float)screenWidth - w)/2.0;
-      } else {
-        h = ((float)screenWidth)/(cameraAspectRatio);
-        w = (float)screenWidth;
-        hOffset = ((float)screenWidth - w)/2.0;
+    if (format == STEREO_CARD) {
+      if (review == REVIEW) { // is a SBS 3D saved image
+        h = wScreen / (cameraAspectRatio/2.0);
+        w = wScreen;
+      } else if (review >= REVIEW_ANAGLYPH) { // is a 2D saved image
+        h = hScreen;
+        w = hScreen * arImg;
+        hOffset = (wScreen - w)/2.0;
+      } else { // is a 3D SBS live image
+        h = wScreen / (cameraAspectRatio);
+        w = wScreen;
+        hOffset = (wScreen - w)/2.0;
       }
     } else {
-      if (preview >= PREVIEW_ANAGLYPH) {
-        h = ((float)screenWidth)/(cameraAspectRatio/2.0);
-        w = (float)screenWidth;
-      } else {
-        h = ((float)screenWidth)/(cameraAspectRatio);
-        w = (float)screenWidth;
+      if (review == REVIEW) { // is a SBS 3D saved image
+        h = wScreen / arImg;
+        w = wScreen;
+        hOffset = (wScreen - w)/2.0;
+      } else if (review >= REVIEW_ANAGLYPH) {  // is a 2D saved image
+        //h = (wScreen)/(cameraAspectRatio/2.0);
+        h = hScreen ;
+        w = hScreen * arImg;
+        hOffset = (wScreen - w)/2.0;
+      } else {  // is a 3D SBS live image
+        h = wScreen / (cameraAspectRatio);
+        w = wScreen;
+        hOffset = (wScreen - w)/2.0;
       }
     }
     background(0);
-    if (mirror && !overrideMirror && preview == PREVIEW_OFF) {
+    if (mirror && !overrideMirror && review == LIVEVIEW) {
       pushMatrix();
       scale(-1, 1);
-      image(input, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
+      image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
       popMatrix();
     } else {
-      if (mirror && !overrideMirror && preview >= PREVIEW_ANAGLYPH) {
+      if (mirror && !overrideMirror && review >= REVIEW_ANAGLYPH) {
         pushMatrix();
         scale(-1, 1);
         if (screenWidth < screenHeight) {
-          image(input, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
+          image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
         } else {
-          image(input, -screenWidth+hOffset, (screenHeight-h), w, h);
+          image(img, -screenWidth+hOffset, (screenHeight-h), w, h);
         }
         popMatrix();
       } else {
-        image(input, hOffset, (screenHeight-h)/2.0, w, h);
+        image(img, hOffset, (screenHeight-h)/2.0, w, h);
       }
     }
     if (DEBUG_ONSCREEN) {
-      text("draw3DImage "+" w=" + w+ " h="+h+" preview="+preview+" override="+overrideMirror, 20, height/2);
+      fill(255);
+      text("draw3DImage image "+" w=" + wImg+ " h="+hImg+" arImg="+arImg, 20, height/2-40);
+      text("draw3DImage "+" w=" + w+ " h="+h+" review="+review+" override="+overrideMirror, 20, height/2);
       text("draw3DImage "+ " anaglyph="+anaglyph+ " mirror="+mirror, 20, height/2+40);
     }
     if (!OK) {
       fill(128);
       text("NO IMAGES", width/4, height/2);
       println("NO IMAGES");
-      preview = PREVIEW_END;
+      review = REVIEW_END;
     }
   }
 
+  private void draw3DliveviewImage(PImage img, int review) {
+    float hImg= img.height;
+    float wImg = img.width;
+    float arImg = wImg/hImg;  // aspect ratio of image
+    float hScreen = (float) screenHeight;
+    float wScreen = (float) screenWidth;
+    float h = 0;
+    float w = 0;
+    float hOffset = 0;
+    // adjust for display
+    if (format == STEREO_CARD) {
+      if (review == LIVEVIEW_ANAGLYPH) { // is a 2D saved image
+        h = hScreen;
+        w = hScreen * arImg;
+        hOffset = (wScreen - w)/2.0;
+      } else { // is a 3D SBS live image
+        h = wScreen / (cameraAspectRatio);
+        w = wScreen;
+        hOffset = (wScreen - w)/2.0;
+      }
+    } else {
+      if (review == LIVEVIEW_ANAGLYPH) {  // is a 2D saved image
+        h = hScreen ;
+        w = hScreen * arImg;
+        hOffset = (wScreen - w)/2.0;
+      } else {  // is a 3D SBS live image
+        h = wScreen / (cameraAspectRatio);
+        w = wScreen;
+        hOffset = (wScreen - w)/2.0;
+      }
+    }
+    background(0);
+    if (mirror && review == LIVEVIEW) {
+      pushMatrix();
+      scale(-1, 1);
+      image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
+      popMatrix();
+    } else {
+      if (mirror && review == LIVEVIEW_ANAGLYPH) {
+        pushMatrix();
+        scale(-1, 1);
+        if (screenWidth < screenHeight) {
+          image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
+        } else {
+          image(img, -screenWidth+hOffset, (screenHeight-h), w, h);
+        }
+        popMatrix();
+      } else {
+        image(img, hOffset, (screenHeight-h)/2.0, w, h);
+      }
+    }
+    if (DEBUG_ONSCREEN) {
+      fill(255);
+      text("draw3DImage image "+" w=" + wImg+ " h="+hImg+" arImg="+arImg, 20, height/2-40);
+      text("draw3DImage "+" w=" + w+ " h="+h+" review="+review, 20, height/2);
+      text("draw3DImage "+ " anaglyph="+anaglyph+ " mirror="+mirror, 20, height/2+40);
+    }
+  }
+
+  private void draw3DreviewImage(PImage img, int index) {
+    float hImg= img.height;
+    float wImg = img.width;
+    float arImg = wImg/hImg;  // aspect ratio of image
+    float hScreen = (float) screenHeight;
+    float wScreen = (float) screenWidth;
+    float h = 0;
+    float w = 0;
+    float hOffset = 0;
+
+    // adjust for display
+    if (format == STEREO_CARD) {
+      if (index == REVIEW) { // is a SBS 3D saved image
+        h = hScreen;
+        w = hScreen * arImg;
+        hOffset = (wScreen - w)/2.0;
+      } else if (index >= REVIEW_ANAGLYPH) { // is a 2D saved image
+        h = hScreen;
+        w = hScreen * arImg;
+        hOffset = (wScreen - w)/2.0;
+      }
+    } else {
+      if (index == REVIEW) { // is a SBS 3D saved image
+        h = wScreen / arImg;
+        w = wScreen;
+        hOffset = (wScreen - w)/2.0;
+      } else if (index >= REVIEW_ANAGLYPH) {  // is a 2D saved image
+        h = hScreen ;
+        w = hScreen * arImg;
+        hOffset = (wScreen - w)/2.0;
+      }
+    }
+    background(0);
+    image(img, hOffset, (screenHeight-h)/2.0, w, h);
+    if (DEBUG_ONSCREEN) {
+      fill(255);
+      text("draw3DImage image "+" w=" + wImg+ " h="+hImg+" arImg="+arImg, 20, height/2-40);
+      text("draw3DImage "+" w=" + w+ " h="+h+" review="+index, 20, height/2);
+      text("draw3DImage "+ " anaglyph="+anaglyph+ " mirror="+mirror, 20, height/2+40);
+    }
+  }
+
+  // draw previous is photo just taken, not in review mode
   public void drawPrevious() {
     if (DEBUG) println("drawPrevious() currentState="+currentState);
     if (camera3D) {
-      draw3DImage(images[currentState], PREVIEW, true);
+      //draw3DreviewImage(images[currentState], REVIEW);
+      if (anaglyph)
+        draw3DreviewImage(images[REVIEW_ANAGLYPH], REVIEW_ANAGLYPH);
+      else
+        draw3DreviewImage(images[currentState], REVIEW);
     } else {
       drawImage(images[currentState], true);
     }
@@ -198,10 +318,9 @@ class PhotoBoothController {
 
   public void drawLast() {
     if (numberOfPanels == 1) {
-      if (images[SBS] != null) {
-        //if (DEBUG) println("drawLast() preview="+preview);
+      if (images[SBS] != null) {  // check that images have been saved for review
         if (camera3D) {
-          draw3DImage(images[preview], preview, true);
+          draw3DreviewImage(images[review], review);
         } else {
           drawImage(images[SBS]);
         }
@@ -209,9 +328,9 @@ class PhotoBoothController {
         fill(255);
         text("NO IMAGES", screenWidth/4, screenHeight);
       }
-    } else {
+    } else { // collage not tested for 3D mode TODO
       if (collage2x2 != null) {
-        float bw = (cameraWidth-(cameraHeight/printAspectRatio))/2.0;
+        float bw = (cameraWidth-(cameraHeight*printAspectRatio))/2.0;
         int sx = int(bw);
         image(collage2x2, sx/2, 0, collage2x2.width/4, collage2x2.height/4);
       }
@@ -220,7 +339,7 @@ class PhotoBoothController {
 
   public void drawMask() {
     if (camera3D) {
-      draw3DMaskForScreen(printAspectRatio); // mask off screen to show print view
+      draw3DMaskForScreen(); // mask off screen to show print view
     } else {
       drawMaskForScreen(printAspectRatio); // mask off screen to show print view
     }
@@ -229,9 +348,11 @@ class PhotoBoothController {
   public void drawCurrent() {
     if (camera3D) {
       if (anaglyph) {
-        draw3DImage(currentImage, PREVIEW_ANAGLYPH, false);
+        //draw3DImage(currentImage, REVIEW_ANAGLYPH, false);
+        draw3DliveviewImage(currentImage, LIVEVIEW_ANAGLYPH);
       } else {
-        draw3DImage(currentImage, PREVIEW_OFF, false);
+        //draw3DImage(currentImage, LIVEVIEW, false);
+        draw3DliveviewImage(currentImage, LIVEVIEW);
       }
     } else {
       drawImage(currentImage);
@@ -252,9 +373,11 @@ class PhotoBoothController {
     currentImage = imageProcessor.processImage(currentRawImage);
     if (camera3D) {
       if (anaglyph) {  //check for anaglyph because aspect ratio reduced
-        draw3DImage(currentImage, PREVIEW_ANAGLYPH, false);
+        draw3DliveviewImage(currentImage, LIVEVIEW_ANAGLYPH);
+        //draw3DImage(currentImage, REVIEW_ANAGLYPH, false);
       } else {
-        draw3DImage(currentImage, PREVIEW_OFF, false);
+        draw3DliveviewImage(currentImage, LIVEVIEW);
+        //draw3DImage(currentImage, LIVEVIEW, false);
       }
     } else {
       drawImage(currentImage);
@@ -372,7 +495,7 @@ class PhotoBoothController {
   // not tested
   void drawCollage(PImage img) {
     if (img != null) {
-      float bw = (screenWidth-(screenHeight/printAspectRatio))/2.0;
+      float bw = (screenWidth-(screenHeight*printAspectRatio))/2.0;
       int sx = int(bw);
       //image(collage2x2, sx/2, 0, collage2x2.width/4, collage2x2.height/4);
       image(img, sx, 0, img.width/(2*cameraHeight/screenHeight), img.height/(2*cameraHeight/screenHeight));
@@ -476,8 +599,8 @@ class PhotoBoothController {
     images[SBS] = mirror3D(img, mirror);
     filename = outputFolderPath + File.separator + outputFilename + suffix + "_2x1"+ "." + filetype;
     images[SBS] = imageProcessor.alignSBS(images[SBS], horizontalOffset, verticalOffset, mirror);
-    if (screenMask) {
-      images[SBS] = cropForMaskPrint(images[SBS], printAspectRatio);
+    if (format == STEREO_CARD) {
+      images[SBS] = cropFor3DMaskPrint(images[SBS], printAspectRatio);
     }
     images[SBS].save(filename);  // save SBS image
     sbsFilename = filename;
@@ -492,14 +615,12 @@ class PhotoBoothController {
     anaglyphFilename = filename;
   }
 
-  // crop for mask printing
-  PImage cropForMaskPrint(PImage src, float printAspectRatio) {
-    if (DEBUG) println("cropForMaskPrint print AR="+printAspectRatio);
-    if (DEBUG) println("cropForMaskPrint image width="+src.width + " height="+src.height);
-    float AR = printAspectRatio; //8.0/9.0;  // crop aspect ratio
+  // crop for 3D mask printing
+  PImage cropFor3DMaskPrint(PImage src, float printAspectRatio) {
+    if (DEBUG) println("cropFor3DMaskPrint print AR="+printAspectRatio);
+    if (DEBUG) println("cropFor3DMaskPrint image width="+src.width + " height="+src.height);
     // create a new PImage
-    //float bw = (src.height/AR); // pixel width for one eye view
-    float bw = (300*6); // pixel width for printer at 300 dpi
+    float bw = (printPxWidth); // pixel width for printer at 300 dpi
     if (DEBUG) println("bw="+bw);
     int iw = int(bw/2);
     int sx = ((src.width/2)-iw)/2;
@@ -510,13 +631,40 @@ class PhotoBoothController {
     int dy = 0;
     int dw = sw;
     int dh = src.height;
-    PImage img = createImage(2*dw, dh, RGB);
+    int dd = (printPxHeight-dh)/2;
+    PImage img;
+    PGraphics pg = createGraphics(printPxWidth, printPxHeight);
     if (DEBUG) println(" sx="+sx+" sy="+sy+" sw="+sw+" sh="+sh +" dx="+dx+" dy="+dy+" dw="+dw+" dh="+dh);
-    img.copy(src, sx, sy, sw, sh, dx, dy, dw, dh);  // cropped left eye copy
+    //img.copy(src, sx, sy, sw, sh, dx, dy, dw, dh);  // cropped left eye copy
+    pg.beginDraw();
+    pg.background(255); // white
+    pg.copy(src, sx, sy, sw, sh, dx, dy+dd, dw, dh);  // cropped left eye copy
     sx = sx + src.width/2;
     dx = dx + iw;
     if (DEBUG) println(" sx="+sx+" sy="+sy+" sw="+sw+" sh="+sh +" dx="+dx+" dy="+dy+" dw="+dw+" dh="+dh);
-    img.copy(src, sx, sy, sw, sh, dx, dy, dw, dh);  // cropped right eye copy
+    pg.copy(src, sx, sy, sw, sh, dx, dy+dd, dw, dh);  // cropped right eye copy
+
+    // draw header and footer text
+    // header
+    pg.fill(0);  // black text
+    pg.textSize(fontSize);
+    String headerText = eventText;
+    float hw = round(((printPxWidth/2)-pg.textWidth(headerText))/2.0);
+    if (DEBUG) println("hw="+hw);
+    pg.text(headerText, hw, fontSize );
+    pg.text(headerText, dx + hw, fontSize );
+
+    // footer
+    pg.fill(0);  // black text
+    pg.textSize(fontSize);
+    String footerText = titleText;
+    float fw = round(((printPxWidth/2)-pg.textWidth(footerText))/2.0);
+    if (DEBUG) println("fw="+fw);
+    pg.text(footerText, fw, dh + dd + fontSize );
+    pg.text(footerText, dx + fw, dh + dd + fontSize );
+    pg.endDraw();
+
+    img = pg.copy();
     return img;
   }
 
@@ -580,10 +728,11 @@ class PhotoBoothController {
     return img;
   }
 
+  // 2D camera
   // draw mask for screen to match print image aspect ratio
   // 4x6 print aspect ratio
   void drawMaskForScreen( float printAspectRatio) {
-    if (!screenMask) return;
+    if (format != STEREO_CARD) return;
     float x = 0;
     float y = 0;
     float w = (screenWidth-(screenHeight/printAspectRatio))/2.0;
@@ -668,14 +817,15 @@ class PhotoBoothController {
 
   // draw mask for screen to match print image aspect ratio
   // 4x6 print aspect ratio
-  void draw3DMaskForScreen( float printAspectRatio) {
-    if (!screenMask) return;
+  void draw3DMaskForScreen() {
+    if (format != STEREO_CARD) return;
     fill(0);
     float x = 0;
     float y = 0;
     float w = 0;
     float h = 0;
-    w = (screenWidth-(screenHeight/printAspectRatio)/2.0)/2.0;
+    //w = (screenWidth-(screenHeight*printAspectRatio)/2.0)/2.0;
+    w = (screenWidth-(printPxWidth)/2.0)/2.0;
     h = screenHeight;
     //println("w="+w+" h="+h);
 
@@ -717,9 +867,10 @@ class PhotoBoothController {
 
   // Save composite collage from original photos
   // images input already cropped
+  // not tested TODO
   PGraphics saveCollage(PImage[] collage, String outputFolderPath, String outputFilename, String suffix, String filetype) {
     PGraphics pg;
-    int w = int(cameraHeight/printAspectRatio);
+    int w = int(cameraHeight*printAspectRatio);
     int h = cameraHeight;
     pg = createGraphics(2*w, 2*h);
     pg.beginDraw();
@@ -808,7 +959,7 @@ class PhotoBoothController {
   void save3Dprint(PImage src, float printAspectRatio, String filename) {
     PImage img;
     int dw = src.width;
-    int dh = int(((float) dw)*printAspectRatio);
+    int dh = int(((float) dw)/printAspectRatio);
     int dx = 0;
     int dy = (dh-src.height)/2;
     if (DEBUG) println("src.width="+src.width + " src.height="+src.height + " dx="+dx+" dy="+dy+" dw="+dw+" dh="+dh);

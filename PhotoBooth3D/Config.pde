@@ -26,7 +26,7 @@ int verticalOffset = 0;
 
 String eventText;
 String instructionLineText;
-String featureText = "Crop For Stereo Card Print";
+String featureText = "Stereo Card Print Format";
 String finalCountdownText = "Freeze!";
 
 String titleText="3D Photo Booth";
@@ -56,9 +56,12 @@ int orientation = LANDSCAPE;  // Always using landscape presentation for 3D phot
 //int orientation = PORTRAIT;
 boolean camera3D = false; 
 boolean stereoWindow = false; // show stereo window pane work in progress!
-float printWidth;
-float printHeight;
-float printAspectRatio = 4.0/6.0;  // default aspect ratio 4x6 inch print portrait orientation
+float printWidth= 6;  // inches
+float printHeight = 4; // inches
+float printAspectRatio = 6.0/4.0;  // default aspect ratio 6x4 inch print landscape orientation
+int printPxWidth;
+int printPxHeight;
+float printPPI = 300.0;
 
 int numberOfPanels = 1;
 boolean mirrorPrint = false;  // mirror photos saved for print by horizontal flip
@@ -112,7 +115,9 @@ void readConfig() {
   ipAddress = configuration.getString("IPaddress");
   if (DEBUG) println("ipAddress="+ipAddress);
   instructionLineText = configuration.getString("instructionLineText");
+  if (DEBUG) println("instructionLineText=\""+instructionLineText+"\"");
   eventText = configuration.getString("eventText");
+  if (DEBUG) println("eventText=\""+eventText+"\"");
   String countdownText = configuration.getString("finalCountdownText");
   if (countdownText != null) {
     finalCountdownText = countdownText;
@@ -171,8 +176,11 @@ void readConfig() {
     printWidth = printer.getFloat("printWidth");
     printHeight = printer.getFloat("printHeight");
     printAspectRatio = printWidth/printHeight;
-    if (DEBUG) println("printAspectRatio="+printAspectRatio);
   }
+  printPxWidth = (int)(printWidth*printPPI);
+  printPxHeight = (int)(printHeight*printPPI);
+  if (DEBUG) println("printWidth="+printWidth+" printHeight="+printHeight+" printAspectRatio="+printAspectRatio);
+  if (DEBUG) println("printPxWidth="+printPxWidth+" printPxHeight="+printPxHeight);
 }
 
 // Check if file exists
