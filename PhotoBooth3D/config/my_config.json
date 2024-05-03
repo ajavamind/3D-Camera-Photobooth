@@ -6,6 +6,7 @@
 		"outputFolderPath": "C:\\Apache24\\htdocs\\data\\images",
 		"IPaddress": "192.168.0.100",
 		"mirrorScreen": true,
+		"mirrorPrint": false,
 		"saveRaw": true,
 		"countDownStart": 3,
 		"fileType": "jpg",

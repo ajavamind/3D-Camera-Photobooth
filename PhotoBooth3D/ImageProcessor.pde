@@ -181,7 +181,7 @@ class ImageProcessor {
   /**
    * Create color anaglyph PImage from left and right eye view PImages
    * with horizontal offset for stereo window and vertical offset for camera alignment correction
-   * This method assumes the left and right images have already been swapped when for mirrored.
+   * This method assumes the left and right images have already been swapped when mirrored for screen live view.
    */
   private PImage colorAnaglyph(PImage bufL, PImage bufR, int horzOffset, int vertOffset) {
     // color anaglyph merge left and right images

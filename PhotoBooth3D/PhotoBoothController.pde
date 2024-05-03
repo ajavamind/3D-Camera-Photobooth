@@ -1,6 +1,9 @@
 // The Photo Booth Controller sequencer for capturing our subject(s) photos
 // Anaglyph only collage not tested or fully implemented
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 class PhotoBoothController {
   int currentState;
   PImage[] images;
@@ -20,13 +23,14 @@ class PhotoBoothController {
   String leftFilename;
   String rightFilename;
 
-  boolean isPhotoShoot, endPhotoShoot;
-  volatile int startPhotoShoot;
+  boolean isPhotoShoot;
+  boolean endPhotoShoot;
   volatile boolean noCountDown = false;
-  int countInterval = 16;
-  int oldShootTimeout = 4*countInterval;
-  int oldShoot = 0;
+
+  int oldShootTimeout = 64;  // number of sketch frames to draw last photo just taken
+  int oldShootCounter = 0; // frame counter for keeping photo taken on screen during draw()
   int countdownStart = 3;
+  int countdownDigit = -1;
 
   int MAX_PANELS = 4; // 4 panels will only show anaglyph images not tested
   int PANEL_WIDTH;
@@ -49,7 +53,6 @@ class PhotoBoothController {
     COUNTDOWN_TEXT_Y = screenHeight/2+COUNTDOWN_BOX_HEIGHT/4;
 
     currentState = 0;
-    startPhotoShoot = 0;
     images = new PImage[MAX_PANELS];
     isPhotoShoot=false;
     endPhotoShoot=false;
@@ -77,10 +80,8 @@ class PhotoBoothController {
   }
 
   // initialize counters for the controller
-  void setCountInterval(int interval, int start) {
-    countInterval = interval;
-    oldShootTimeout = 4*countInterval;
-    oldShoot = 0;
+  void setCountdownStart(int start) {
+    oldShootCounter = 0;
     countdownStart = start;
   }
 
@@ -348,10 +349,8 @@ class PhotoBoothController {
   public void drawCurrent() {
     if (camera3D) {
       if (anaglyph) {
-        //draw3DImage(currentImage, REVIEW_ANAGLYPH, false);
         draw3DliveviewImage(currentImage, LIVEVIEW_ANAGLYPH);
       } else {
-        //draw3DImage(currentImage, LIVEVIEW, false);
         draw3DliveviewImage(currentImage, LIVEVIEW);
       }
     } else {
@@ -360,11 +359,22 @@ class PhotoBoothController {
     drawMask();
   }
 
-  public void oldShoot() {
-    if (oldShoot > oldShootTimeout) {
+  // show last photo taken for a short time
+  // variable oldShootCounter is a frame counter for draw()
+  public void lastPhoto() {
+    if (oldShootCounter > oldShootTimeout) {
       tryPhotoShoot();
     }
-    oldShoot++;
+    oldShootCounter++;
+  }
+
+  public void tryPhotoShoot() {
+    if (!isPhotoShoot) startPhotoShoot(countdownStart);
+    else {
+      endPhotoShoot = false;
+      isPhotoShoot = false;
+      background(0);
+    }
   }
 
   public void processImage(PImage input) {
@@ -374,10 +384,8 @@ class PhotoBoothController {
     if (camera3D) {
       if (anaglyph) {  //check for anaglyph because aspect ratio reduced
         draw3DliveviewImage(currentImage, LIVEVIEW_ANAGLYPH);
-        //draw3DImage(currentImage, REVIEW_ANAGLYPH, false);
       } else {
         draw3DliveviewImage(currentImage, LIVEVIEW);
-        //draw3DImage(currentImage, LIVEVIEW, false);
       }
     } else {
       drawImage(currentImage);
@@ -385,32 +393,41 @@ class PhotoBoothController {
     drawMask();
   }
 
-  public void tryPhotoShoot() {
-    if (!isPhotoShoot) startPhotoShoot();
-    else {
-      endPhotoShoot = false;
-      isPhotoShoot = false;
-      background(0);
-    }
-  }
-
-  public void startPhotoShoot() {
+  public void startPhotoShoot(int start) {
     if (isPhotoShoot) return; // return when already in countdown shoot mode
     isPhotoShoot = true;
-    startPhotoShoot = 0;
+    countdownDigit = start+1;
+    if (noCountDown) {
+      noCountDown = false;
+      countdownDigit = 1; // smile only before shutter
+    }
+
+    Timer timer = new Timer();
+    // define a task to decrement the countdown digit every second
+    TimerTask task = new TimerTask() {
+      public void run() {
+        countdownDigit--;
+        if (countdownDigit < 0) {
+          // stop the timer when the countdown reaches 0
+          timer.cancel();
+        }
+      }
+    };
+    // start the timer
+    timer.scheduleAtFixedRate(task, 0, 1000);
   }
 
   public void endPhotoShoot() {
     endPhotoShoot = true;
-    oldShoot = 0;
+    oldShootCounter = 0;
     if (DEBUG) println("endPhotoShoot drawPrevious()");
     drawPrevious();
   }
 
   // draw photo shoot count down digits
-  public void drawPhotoShoot() {
+  public void drawCountdownSequence() {
     background(0);
-    int digit = getCountDownDigit(countdownStart, countInterval);
+    int digit = getCountDownDigit();
     if (digit > 0 && !endPhotoShoot) {
       drawCurrent();
       fill(0x80FFFF80);
@@ -485,14 +502,11 @@ class PhotoBoothController {
           pg.dispose();
           drawCollage(collage2x2);
         }
-        //drawMask();
       }
-      startPhotoShoot=0;
     }
-    startPhotoShoot++;
   }
 
-  // not tested
+  // not tested for 3D
   void drawCollage(PImage img) {
     if (img != null) {
       float bw = (screenWidth-(screenHeight*printAspectRatio))/2.0;
@@ -502,31 +516,8 @@ class PhotoBoothController {
     }
   }
 
-  int getCountDownDigit(int initial, int photoDelay) {
-    int cdd = -1; // count down digit value
-    int aDelay = photoDelay/4;
-    if (numberOfPanels == 4) {  // not tested
-      aDelay = photoDelay/4;
-    }
-    if (!anaglyph) aDelay = photoDelay/2; // anaglyph processing slows down count, so compensate
-    if (startPhotoShoot < aDelay) {
-      cdd = initial;
-    } else if (startPhotoShoot >= aDelay && startPhotoShoot < 2*aDelay) {
-      cdd = initial-1;
-    } else if (startPhotoShoot >= 2*aDelay && startPhotoShoot < 3*aDelay) {
-      cdd = initial-2;
-    } else if (startPhotoShoot >= 3*aDelay && startPhotoShoot < 4*aDelay) {
-      cdd = initial-3;
-    } else if (startPhotoShoot >= 4*aDelay) {
-      cdd = initial-4;
-    }
-    if (noCountDown) {
-      noCountDown = false;
-      startPhotoShoot = 4*aDelay;
-      cdd = initial-3;
-    }
-    if (DEBUG) println("countDownCounter="+cdd + " aDelay="+aDelay + " startPhotoShoot="+startPhotoShoot);
-    return cdd;
+  int getCountDownDigit() {
+    return countdownDigit;
   }
 
   public void setFilter(int num) {
@@ -595,10 +586,14 @@ class PhotoBoothController {
   public void save3DImage(PImage img, String outputFolderPath, String outputFilename, String suffix, String filetype) {
     String filename;
     if (DEBUG) println("save3DImage ");
-
-    images[SBS] = mirror3D(img, mirror);
     filename = outputFolderPath + File.separator + outputFilename + suffix + "_2x1"+ "." + filetype;
-    images[SBS] = imageProcessor.alignSBS(images[SBS], horizontalOffset, verticalOffset, mirror);
+    if (!mirrorPrint && mirror) {
+      images[SBS] = mirror3D(img, false);
+      images[SBS] = imageProcessor.alignSBS(images[SBS], horizontalOffset, verticalOffset, false);
+    } else {
+      images[SBS] = mirror3D(img, mirror);
+      images[SBS] = imageProcessor.alignSBS(images[SBS], horizontalOffset, verticalOffset, mirror);
+    }
     if (format == STEREO_CARD) {
       images[SBS] = cropFor3DMaskPrint(images[SBS], printAspectRatio);
     }

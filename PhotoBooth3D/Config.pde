@@ -104,6 +104,7 @@ void readConfig() {
     multiCamEnabled = false;
   }
   mirror = configuration.getBoolean("mirrorScreen");
+  mirrorPrint = configuration.getBoolean("mirrorPrint");
   try {
   saveRaw = configuration.getBoolean("saveRaw");
   } catch (Exception esr) {

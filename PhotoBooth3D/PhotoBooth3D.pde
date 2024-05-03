@@ -76,7 +76,7 @@ public void setup() {
   initConfig();  // read JSON configuration file my_config.json
   FRAME_RATE = cameraFrameRate;  // Processing loop frame rate
   fullScreen(RENDERER);
-  //size(1080, 1920, RENDERER);  // for debug vertical monitor for portrait display, not used with 3D
+  //size(1080, 1920, RENDERER);  // for debug vertical monitor for portrait display, used with 2D camera
   //size(1920, 1080, RENDERER);  // matches monitor for landscape 3D
   //size(3840, 2160, RENDERER);  // for debug with 4K monitor
 
@@ -87,6 +87,8 @@ public void setup() {
   intializeMulti(ipAddress);  // address of a device on this private network
   frameRate(FRAME_RATE); // set draw loop frame rate
   smooth();
+  
+  // font type and size setup
   font = loadFont("SansSerif-64.vlw");
   textFont(font);
   if (screenWidth >= 3840) {
@@ -101,12 +103,13 @@ public void setup() {
   textSize(fontSize);
   largeFontSize = 6*fontSize;
 
-  // read legend files for display
+  // read legend files that describe key entry functions
   legend1 = loadStrings("keyLegend.txt");
   legend2 = loadStrings("keyLegend2.txt");
   legend3 = loadStrings("keyLegend3.txt");
   legend = new String[][] { legend1, legend2, legend3};
 
+  // where output file go
   if (OUTPUT_FOLDER_PATH.equals("output")) {  // default folder name
     OUTPUT_FOLDER_PATH = sketchPath("output");
   }
@@ -194,7 +197,8 @@ public void setup() {
     }
   }
   // set count down Interval
-  photoBoothController.setCountInterval(countInterval, countdownStart);
+  //photoBoothController.setCountInterval(countInterval, countdownStart);
+  photoBoothController.setCountdownStart(countdownStart);
   surface.setTitle(titleText);
   if (DEBUG) println("Renderer: "+RENDERER);
   if (DEBUG) println("finished setup()");
@@ -252,7 +256,7 @@ public void draw() {
   }
 
   if (photoBoothController.endPhotoShoot) {
-    photoBoothController.oldShoot(); // show result
+    photoBoothController.lastPhoto(); // keep drawing last photo taken for 2 seconds using oldShootCounter as a frame counter
   } else {
     if (review > LIVEVIEW) {
       photoBoothController.drawLast();
@@ -262,7 +266,7 @@ public void draw() {
     drawText();  //  TODO make PGraphic
     if (photoBoothController.isPhotoShoot) {
       try {
-        photoBoothController.drawPhotoShoot();
+        photoBoothController.drawCountdownSequence();
       }
       catch (Exception exx) {
         println("drawPhotoShoot "+exx);
@@ -315,11 +319,14 @@ void showCamerasList() {
       i++;
     }
   }
+  // show configuration list
   i++;
   text("FRAME_RATE="+FRAME_RATE, horzAdj, vertAdj*(i++));
   text("camera3D="+(camera3D==true ? "ON": "OFF"), horzAdj, vertAdj*(i++));
   text("saveRaw="+(saveRaw==true ? "ON": "OFF"), horzAdj, vertAdj*(i++));
   text("mirror="+(mirror==true ? "ON": "OFF"), horzAdj, vertAdj*(i++));
+  text("mirrorPrint="+(mirrorPrint==true ? "ON": "OFF"), horzAdj, vertAdj*(i++));
+  text("Anaglyph="+(anaglyph==true ? "ON": "OFF"), horzAdj, vertAdj*(i++));
   text("orientation="+(orientation==LANDSCAPE ? "LANDSCAPE":"PORTRAIT"), horzAdj, vertAdj*(i++));
   text("horizontalOffset="+horizontalOffset, horzAdj, vertAdj*(i++));
   text("verticalOffset="+verticalOffset, horzAdj, vertAdj*(i++));
