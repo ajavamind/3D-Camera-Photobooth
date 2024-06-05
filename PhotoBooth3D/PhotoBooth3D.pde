@@ -28,7 +28,6 @@ int fontSize;
 int largeFontSize;
 PhotoBoothController photoBoothController;
 ImageProcessor imageProcessor;
-//boolean runFilter = true;  // set to false when RENDERER is P2D or P3D
 
 String RENDERER = JAVA2D; // default recommended RENDERER to avoid unresolved OpenGL GPU problems, but slow video
 // P2D and P3D use OPENGL and graphics processor
@@ -37,7 +36,6 @@ String RENDERER = JAVA2D; // default recommended RENDERER to avoid unresolved Op
 //String RENDERER = P3D; // a OpenJDK Java memory exception bug in OpenGL video library prevents this render mode from working with filters
 
 float FRAME_RATE = 30;
-int countInterval = 16;
 
 // Index values used for review variable
 private static final int LIVEVIEW_ANAGLYPH = -2;  // live view Anaglyph index
@@ -87,7 +85,7 @@ public void setup() {
   intializeMulti(ipAddress);  // address of a device on this private network
   frameRate(FRAME_RATE); // set draw loop frame rate
   smooth();
-  
+
   // font type and size setup
   font = loadFont("SansSerif-64.vlw");
   textFont(font);
@@ -186,10 +184,8 @@ public void setup() {
     try {
       if (RENDERER.equals(P2D) || RENDERER.equals(P3D)) {
         ((com.jogamp.newt.opengl.GLWindow) surface.getNative()).requestFocus();  // for P2D
-        countInterval = 2*16;
       } else {
         ((java.awt.Canvas) surface.getNative()).requestFocus();  // for JAVA2D (default)
-        countInterval = 16;
       }
     }
     catch (Exception ren) {
@@ -239,11 +235,10 @@ public void draw() {
   if (video.available()) {
     if (RENDERER.equals(P2D) || RENDERER.equals(P3D)) {
       // temporary until video library fixes bug
-      video.loadPixels(); // work around issue with Capture video library buffer
-      video.updatePixels(); //  work around issue with Capture video library buffer
       image(video, 0, 0, 0, 0);  // needed as work around issue with Capture video library buffer
+      video.loadPixels(); // work around issue with Capture video library buffer
       video.read();
-      camImage[nextIndex] = video;
+      camImage[nextIndex] = video;  // double buffering
     } else {  // JAVA2D
       image(video, 0, 0, 0, 0);  // needed as work around issue with Capture video library buffer
       video.read();

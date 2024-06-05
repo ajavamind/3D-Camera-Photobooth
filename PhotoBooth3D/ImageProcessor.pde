@@ -130,9 +130,10 @@ class ImageProcessor {
   /**
    * Align side-by-side LR image by moving right image using offsets.
    * Fill unused area with black (0)
-   * PImage img Input image with left and right SBS eye views
-   * horzOffset camera alignment horizontally to adjust stereo window placement
-   * vertOffset adjust camera misalignment vertically for stereo
+   * PImage img SBS image with left and right side-by-side parallel
+   * output img size is reduced by horzOffset and vertOffset values
+   * horzOffset camera alignment horizontally to adjust stereo window placement parallax
+   * vertOffset adjust camera misalignment vertically for stereoscopic viewing
    * boolean mirror Swap image left and right eye pixel sources
    */
   public PImage alignSBS(PImage img, int horzOffset, int vertOffset, boolean mirror) {
@@ -171,6 +172,61 @@ class ImageProcessor {
         } else {
           temp.pixels[idl] = img.pixels[isl]; // when in bounds of pixel array, store color
           temp.pixels[idr] = img.pixels[isr]; // when in bounds of pixel array, store color
+        }
+      }
+    }
+    temp.updatePixels();
+    return temp;
+  }
+
+  /**
+   * Align LR image pairs by moving right image using offsets.
+   * Fill unused area with black (0)
+   * PImage img left camera/eye image
+   * PImage img right camera/eye image
+   * output img size is reduced by horzOffset and vertOffset values
+   * horzOffset camera alignment horizontally to adjust stereo window placement parallax
+   * vertOffset adjust camera misalignment vertically for stereoscopic viewing
+   * boolean mirror Swap image left and right eye pixel sources
+   * Assumes LR images are exact same dimensions
+   */
+  public PImage alignLR(PImage imgL, PImage imgR, int horzOffset, int vertOffset, boolean mirror) {
+    int vert = vertOffset;
+    int horz = horzOffset;
+    //horz = 0; // test
+    //vert = 0;
+    int w2 = 2*imgL.width;
+    int w = imgL.width;
+    int h = imgL.height;
+    int dw = w - abs(horz);
+    int dw2 = 2*dw;
+    int dh = h - abs(vert);
+    int topd = dw2*dh;
+    int tops = w2 *h;
+    PImage temp = createImage(dw2, dh, RGB);
+    imgL.loadPixels();
+    imgR.loadPixels();
+    temp.loadPixels();
+    int idl = 0; // computed left destination index into pixel array of image
+    int idr = 0; // computed right destination index into pixel array of image
+    int isl = 0; // computed left source index into pixel array of image
+    int isr = 0; // computed right source index into pixel array of image
+    for (int j=0; j<dh; j++) {  // j vertical scan rows
+      for (int i=0; i<dw; i++) { // i horizontal scan columns
+        if (mirror) {
+          isl = (j)*w + i + horz;
+          isr = (j-vert)*w + i + w;
+        } else {
+          isl = (j-vert)*w + i + horz;
+          isr = (j)*w + i + w ;
+        }
+        idl = j*dw2 + i;  // adjust index for horzizonal and vertical offsets
+        idr = j*dw2 + i + dw;  // adjust index for horzizonal and vertical offsets
+        if (isl > tops || isl < 0) {
+          println(" out of bounds tops= "+i+" "+j);
+        } else {
+          temp.pixels[idl] = imgL.pixels[isl]; // when in bounds of pixel array, store color
+          temp.pixels[idr] = imgR.pixels[isr]; // when in bounds of pixel array, store color
         }
       }
     }
@@ -219,4 +275,25 @@ class ImageProcessor {
     bufA.updatePixels();
     return bufA;
   }
+
+/**
+ * green screen background removal 
+ * PImage img
+ * color c background color to remove - green value from img
+ * float thres threshold typical 0.5
+ * https://stackoverflow.com/questions/62380098/does-processing-transparency-support-removing-backgrounds
+ */
+  public void removeBackground(PImage img, color c, float thres) {
+    colorMode(ARGB);
+    for (int i = 0; i < img.width; i++) {
+      for (int j = 0; j < img.height; j++) {
+        color cp = img.get(i, j);
+        //threshold accounts for compression
+        if (abs(hue(cp) - hue(c)) < thres) {
+          img.set(i, j, color(0, 0, 0, 0));  // alternate set alpha to 1 color(1,0,0,0) border issue?
+        }
+      }
+    }
+  }
+  
 }
