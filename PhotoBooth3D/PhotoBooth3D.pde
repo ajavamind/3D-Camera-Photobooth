@@ -40,16 +40,18 @@ float FRAME_RATE = 30;
 // Index values used for review variable
 private static final int LIVEVIEW_ANAGLYPH = -2;  // live view Anaglyph index
 private static final int LIVEVIEW = -1;  // live view SBS parallel index
-private static final int REVIEW = 0; // saved SBS image index
+private static final int REVIEW = 0; // saved SBS image index or 2D photo
 private static final int REVIEW_ANAGLYPH = 1;  // saved Anaglyph image index
 private static final int REVIEW_LEFT = 2; // saved left image index
 private static final int REVIEW_RIGHT = 3; // saved right image index
 private static final int REVIEW_END = 4; // outside saved image index
+private static final int REVIEW_COLLAGE = 5;  // saved Collage 2D panel image index
 int review = LIVEVIEW; // default no review available yet, live view SBS
 
 // 3D output for stereo card format 6x4 print
-private static final int PARALLEL = 0;  // SBS 3D
-private static final int STEREO_CARD = 1; // Stereo card for stereoscope viewing
+private static final int MONO = 0;  // 2D Card
+private static final int PARALLEL = 1;  // SBS 3D
+private static final int STEREO_CARD = 2; // Stereo card for stereoscope viewing
 int format = PARALLEL;  // default - feature used for cropping SBS for printing stereo card
 
 int legendPage = -1;
@@ -72,6 +74,11 @@ int messageTimeout;  // number of frames
 
 public void setup() {
   initConfig();  // read JSON configuration file my_config.json
+  if (camera3D) {
+    format = PARALLEL;
+  } else {
+    format = MONO;
+  }
   FRAME_RATE = cameraFrameRate;  // Processing loop frame rate
   fullScreen(RENDERER);
   //size(1080, 1920, RENDERER);  // for debug vertical monitor for portrait display, used with 2D camera
@@ -274,7 +281,7 @@ public void draw() {
   // Display status message if present
   drawMessage();
 
-  if (stereoWindow) {
+  if (camera3D && stereoWindow) {
     // show stereo window pane
     //blend(0, 0, input.width, input.height, 0, 0, input.width, input.height, MULTIPLY);
     image(windowPane, 0, 0);
@@ -329,6 +336,7 @@ void showCamerasList() {
   text("Broadcast IPAddress="+ broadcastIpAddress, horzAdj, vertAdj*(i++));
   text("doubleTrigger="+doubleTrigger, horzAdj, vertAdj*(i++));
   text("doubleTriggerDelay="+doubleTriggerDelay+" ms", horzAdj, vertAdj*(i++));
+  text("numberOfPanels="+numberOfPanels, horzAdj, vertAdj*(i++));
 }
 
 // Draw instruction and event text on screen

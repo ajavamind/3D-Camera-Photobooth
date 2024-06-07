@@ -24,7 +24,7 @@
 		"height": 1080,
 		"fps": 30,
 		"orientation": "landscape",
-		"pipelinetest": "pipeline: ksvideosrc device-index=0 ! image/jpeg, width=3840, height=1080, framerate=30/1 ! jpegdec ! videoconvert",
+		"pipelineWindowsTest": "pipeline: ksvideosrc device-index=0 ! image/jpeg, width=3840, height=1080, framerate=30/1 ! jpegdec ! videoconvert",
 		"3D_comment1": "horizontalOffset adjusts the parallax, positive or negative.",
 		"3D_comment2": "verticalOffset corrects vertical alignment of left and right image views.",
 		"3D": true,
@@ -33,7 +33,8 @@
     },
 	"printer": {
 		"name": "Canon Selphy 1300",
-		"printWidth": 4.0,
-		"printHeight": 6.0,
+		"printWidth": 6.0,
+		"printHeight": 4.0,
+		"printPPI": 300,
 	}
 }

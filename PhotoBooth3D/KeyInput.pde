@@ -99,13 +99,16 @@ void mousePressed() {
     } else {
       lastKeyCode = KEYCODE_LEFT_BRACKET; // Single Photo capture
     }
-    if (DEBUGKEY) println("mousePressed set lastKeyCode="+lastKeyCode);
   } else if (button == CENTER) {
     lastKeyCode = KEYCODE_ESC;
   } else if (button == RIGHT) {
-    //lastKeyCode = KEYCODE_RIGHT_BRACKET;  // collage 2x2 capture
-    lastKeyCode = KEYCODE_A;  // anaglyph display
+    if (camera3D) {
+      lastKeyCode = KEYCODE_A;  // anaglyph display
+    } else {
+      lastKeyCode = KEYCODE_RIGHT_BRACKET;  // collage 2x2 capture
+    }
   }
+  if (DEBUGKEY) println("mousePressed "+button+" set lastKeyCode="+lastKeyCode);
 }
 
 // Processing call back when key released, not used
@@ -203,16 +206,22 @@ int keyUpdate() {
     if (DEBUG) println("mirror="+mirror);
     break;
   case KEYCODE_A:  // anaglyph display mode
-    anaglyph = !anaglyph;
-    if (DEBUG) println("anadglyph="+anaglyph);
+    if (camera3D) {
+      anaglyph = !anaglyph;
+      if (DEBUG) println("anadglyph="+anaglyph);
+    }
     break;
   case KEYCODE_E:  // swap left and right eye views
-    crosseye = !crosseye;
-    if (DEBUG) println("crosseye="+crosseye);
+    if (camera3D) {
+      crosseye = !crosseye;
+      if (DEBUG) println("crosseye="+crosseye);
+    }
     break;
   case KEYCODE_G:  // toggle stereo window pane
-    stereoWindow = !stereoWindow;
-    if (DEBUG) println("stereoWindow="+stereoWindow);
+    if (camera3D) {
+      stereoWindow = !stereoWindow;
+      if (DEBUG) println("stereoWindow="+stereoWindow);
+    }
     break;
   case KEYCODE_B:  // toggle save raw out of camera image
     saveRaw = !saveRaw;
@@ -223,8 +232,10 @@ int keyUpdate() {
     if (DEBUG) println("mirrorPrint="+mirrorPrint);
     break;
   case KEYCODE_C:  // collage 2D
-    review = setLiveview();
-    set2x2Photo();
+    if (!camera3D) {
+      review = setLiveview();
+      set2x2Photo();
+    }
     break;
   case KEYCODE_S:  // single photo 2D
     review = setLiveview();
@@ -276,19 +287,25 @@ int keyUpdate() {
     cmd = ENTER;
     break;
   case KEYCODE_P:  // portrait orientation
-    orientation = PORTRAIT;
-    if (DEBUG) println("orientation="+(orientation==LANDSCAPE? "Landscape":"Portrait"));
+    if (!camera3D) {
+      orientation = PORTRAIT;
+      if (DEBUG) println("orientation="+(orientation==LANDSCAPE? "Landscape":"Portrait"));
+    }
     break;
   case KEYCODE_L:  // landscape orientation
     orientation = LANDSCAPE;
     if (DEBUG) println("orientation="+(orientation==LANDSCAPE? "Landscape":"Portrait"));
     break;
   case KEYCODE_T: // toggle mask
-    if (review <= LIVEVIEW) { // change during live view only
-      if (format == PARALLEL)
-        format = STEREO_CARD;
-      else
-        format = PARALLEL;
+    if (camera3D) {
+      if (review <= LIVEVIEW) { // change during live view only
+        if (format == PARALLEL)
+          format = STEREO_CARD;
+        else
+          format = PARALLEL;
+      }
+    } else {
+      format = MONO;
     }
     break;
   case KEYCODE_TAB:
@@ -320,11 +337,21 @@ int keyUpdate() {
         // toggle review last photo or collage
         review++;
 
-      // skip one of single photos left or right
-      if (review == REVIEW_LEFT)  review = REVIEW_RIGHT;
-      // check for end of list
-      if (review >= REVIEW_END) {
-        review = setLiveview();
+      if (camera3D) {
+        // skip one of single photos left or right
+        if (review == REVIEW_LEFT)  review = REVIEW_RIGHT;
+        // check for end of list
+        if (review >= REVIEW_END) {
+          review = setLiveview();
+        }
+      } else {
+        if (numberOfPanels == 1 ) {
+          if (review > REVIEW) review = setLiveview();
+        } else {  // 4 panels and collage
+          if (review >= REVIEW_COLLAGE) {
+            review = setLiveview();
+          }
+        }
       }
       //if (DEBUG) println("review="+review);
     } else {
@@ -347,10 +374,14 @@ int keyUpdate() {
 }
 
 int setLiveview() {
-  if (anaglyph)
-    return LIVEVIEW_ANAGLYPH;
-  else
+  if (camera3D) {
+    if (anaglyph)
+      return LIVEVIEW_ANAGLYPH;
+    else
+      return LIVEVIEW;
+  } else {
     return LIVEVIEW;
+  }
 }
 
 

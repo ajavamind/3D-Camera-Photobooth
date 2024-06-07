@@ -32,7 +32,8 @@
     },
 	"printer": {
 		"name": "Canon Selphy 1300",
-		"printWidth": 4.0,
-		"printHeight": 6.0,
+		"printWidth": 6.0,
+		"printHeight": 4.0,
+		"printPPI": 300,
 	}
 }

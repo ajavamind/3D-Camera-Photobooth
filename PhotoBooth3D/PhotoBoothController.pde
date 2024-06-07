@@ -5,7 +5,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 class PhotoBoothController {
-  int currentState;
+  volatile int currentState;
   PImage[] images;
   // indices for images variable:
   private static final int SBS = 0;
@@ -14,17 +14,17 @@ class PhotoBoothController {
   private static final int RIGHT_EYE = 3;
   volatile PImage currentImage;
   volatile PImage currentRawImage;
-  PImage[] collage; // print aspect ratio
-  PImage collage2x2;  // not tested
+  volatile PImage[] collage;
   String datetime;
+  Timer countdownTimer;
 
   String anaglyphFilename;
   String sbsFilename;
   String leftFilename;
   String rightFilename;
 
-  boolean isPhotoShoot;
-  boolean endPhotoShoot;
+  volatile boolean isPhotoShoot;
+  volatile boolean endPhotoShoot;
   volatile boolean noCountDown = false;
 
   int oldShootTimeout = 64;  // number of sketch frames to draw last photo just taken
@@ -60,7 +60,7 @@ class PhotoBoothController {
     for (int i=0; i<MAX_PANELS; i++) {
       images[i] = new PImage();
     }
-    collage = new PImage[4];
+    collage = new PImage[5]; // 4 panels + collage image
   }
 
   String getLeftFilename() {
@@ -119,88 +119,88 @@ class PhotoBoothController {
   }
 
   public boolean hasPreview() {
-    if (images[REVIEW] != null && images[REVIEW].width == 0) {
+    if (images[REVIEW] == null || images[REVIEW].width == 0) {
       return false;
     }
     return true;
   }
 
-  private void draw3DImage(PImage img, int review, boolean overrideMirror) {
-    float hImg= img.height;
-    float wImg = img.width;
-    float arImg = wImg/hImg;  // aspect ratio of image
-    float hScreen = (float) screenHeight;
-    float wScreen = (float) screenWidth;
-    float h = 0;
-    float w = 0;
-    float hOffset = 0;
-    boolean OK = true;
-    if (img.width == 0) {
-      OK = false;
-    }
-    // adjust for display
-    if (format == STEREO_CARD) {
-      if (review == REVIEW) { // is a SBS 3D saved image
-        h = wScreen / (cameraAspectRatio/2.0);
-        w = wScreen;
-      } else if (review >= REVIEW_ANAGLYPH) { // is a 2D saved image
-        h = hScreen;
-        w = hScreen * arImg;
-        hOffset = (wScreen - w)/2.0;
-      } else { // is a 3D SBS live image
-        h = wScreen / (cameraAspectRatio);
-        w = wScreen;
-        hOffset = (wScreen - w)/2.0;
-      }
-    } else {
-      if (review == REVIEW) { // is a SBS 3D saved image
-        h = wScreen / arImg;
-        w = wScreen;
-        hOffset = (wScreen - w)/2.0;
-      } else if (review >= REVIEW_ANAGLYPH) {  // is a 2D saved image
-        //h = (wScreen)/(cameraAspectRatio/2.0);
-        h = hScreen ;
-        w = hScreen * arImg;
-        hOffset = (wScreen - w)/2.0;
-      } else {  // is a 3D SBS live image
-        h = wScreen / (cameraAspectRatio);
-        w = wScreen;
-        hOffset = (wScreen - w)/2.0;
-      }
-    }
-    background(0);
-    if (mirror && !overrideMirror && review == LIVEVIEW) {
-      pushMatrix();
-      scale(-1, 1);
-      image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
-      popMatrix();
-    } else {
-      if (mirror && !overrideMirror && review >= REVIEW_ANAGLYPH) {
-        pushMatrix();
-        scale(-1, 1);
-        if (screenWidth < screenHeight) {
-          image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
-        } else {
-          image(img, -screenWidth+hOffset, (screenHeight-h), w, h);
-        }
-        popMatrix();
-      } else {
-        image(img, hOffset, (screenHeight-h)/2.0, w, h);
-      }
-    }
-    if (DEBUG_ONSCREEN) {
-      fill(255);
-      text("draw3DImage image "+" w=" + wImg+ " h="+hImg+" arImg="+arImg, 20, height/2-40);
-      text("draw3DImage "+" w=" + w+ " h="+h+" review="+review+" override="+overrideMirror, 20, height/2);
-      text("draw3DImage "+ " anaglyph="+anaglyph+ " mirror="+mirror, 20, height/2+40);
-    }
-    if (!OK) {
-      fill(128);
-      text("NO IMAGES", width/4, height/2);
-      println("NO IMAGES");
-      review = REVIEW_END;
-    }
-  }
+  //private void draw3DImage(PImage img, int review, boolean overrideMirror) {
+  //  float hImg= img.height;
+  //  float wImg = img.width;
+  //  float arImg = wImg/hImg;  // aspect ratio of image
+  //  float hScreen = (float) screenHeight;
+  //  float wScreen = (float) screenWidth;
+  //  float h = 0;
+  //  float w = 0;
+  //  float hOffset = 0;
+  //  boolean OK = true;
+  //  if (img.width == 0) {
+  //    OK = false;
+  //  }
+  //  // adjust for display
+  //  if (format == STEREO_CARD) {
+  //    if (review == REVIEW) { // is a SBS 3D saved image
+  //      h = wScreen / (cameraAspectRatio/2.0);
+  //      w = wScreen;
+  //    } else if (review >= REVIEW_ANAGLYPH) { // is a 2D saved image
+  //      h = hScreen;
+  //      w = hScreen * arImg;
+  //      hOffset = (wScreen - w)/2.0;
+  //    } else { // is a 3D SBS live image
+  //      h = wScreen / (cameraAspectRatio);
+  //      w = wScreen;
+  //      hOffset = (wScreen - w)/2.0;
+  //    }
+  //  } else {
+  //    if (review == REVIEW) { // is a SBS 3D saved image
+  //      h = wScreen / arImg;
+  //      w = wScreen;
+  //      hOffset = (wScreen - w)/2.0;
+  //    } else if (review >= REVIEW_ANAGLYPH) {  // is a 2D saved image
+  //      //h = (wScreen)/(cameraAspectRatio/2.0);
+  //      h = hScreen ;
+  //      w = hScreen * arImg;
+  //      hOffset = (wScreen - w)/2.0;
+  //    } else {  // is a 3D SBS live image
+  //      h = wScreen / (cameraAspectRatio);
+  //      w = wScreen;
+  //      hOffset = (wScreen - w)/2.0;
+  //    }
+  //  }
+  //  background(0);
+  //  if (mirror && !overrideMirror && review == LIVEVIEW) {
+  //    pushMatrix();
+  //    scale(-1, 1);
+  //    image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
+  //    popMatrix();
+  //  } else {
+  //    if (mirror && !overrideMirror && review >= REVIEW_ANAGLYPH) {
+  //      pushMatrix();
+  //      scale(-1, 1);
+  //      if (screenWidth < screenHeight) {
+  //        image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
+  //      } else {
+  //        image(img, -screenWidth+hOffset, (screenHeight-h), w, h);
+  //      }
+  //      popMatrix();
+  //    } else {
+  //      image(img, hOffset, (screenHeight-h)/2.0, w, h);
+  //    }
+  //  }
+  //  if (DEBUG_ONSCREEN) {
+  //    fill(255);
+  //    text("draw3DImage image "+" w=" + wImg+ " h="+hImg+" arImg="+arImg, 20, height/2-40);
+  //    text("draw3DImage "+" w=" + w+ " h="+h+" review="+review+" override="+overrideMirror, 20, height/2);
+  //    text("draw3DImage "+ " anaglyph="+anaglyph+ " mirror="+mirror, 20, height/2+40);
+  //  }
+  //  if (!OK) {
+  //    fill(128);
+  //    text("NO IMAGES", width/4, height/2);
+  //    println("NO IMAGES");
+  //    review = REVIEW_END;
+  //  }
+  //}
 
   private void draw3DliveviewImage(PImage img, int review) {
     float hImg= img.height;
@@ -303,17 +303,41 @@ class PhotoBoothController {
     }
   }
 
+  private void drawReviewImage(PImage img, int index) {
+    float hImg= img.height;
+    float wImg = img.width;
+    float arImg = wImg/hImg;  // aspect ratio of image
+    float hScreen = (float) screenHeight;
+    float wScreen = (float) screenWidth;
+    float h = 0;
+    float w = 0;
+    float hOffset = 0;
+
+    h = hScreen ;
+    w = hScreen * arImg;
+    hOffset = (wScreen - w)/2.0;
+
+    background(0);
+    image(img, hOffset, (screenHeight-h)/2.0, w, h);
+    if (DEBUG_ONSCREEN) {
+      fill(255);
+      text("draw3DImage image "+" w=" + wImg+ " h="+hImg+" arImg="+arImg, 20, height/2-40);
+      text("draw3DImage "+" w=" + w+ " h="+h+" review="+index, 20, height/2);
+      text("draw3DImage "+ " anaglyph="+anaglyph+ " mirror="+mirror, 20, height/2+40);
+    }
+  }
+
   // draw previous is photo just taken, not in review mode
   public void drawPrevious() {
     if (DEBUG) println("drawPrevious() currentState="+currentState);
     if (camera3D) {
-      //draw3DreviewImage(images[currentState], REVIEW);
       if (anaglyph)
         draw3DreviewImage(images[REVIEW_ANAGLYPH], REVIEW_ANAGLYPH);
       else
         draw3DreviewImage(images[currentState], REVIEW);
     } else {
-      drawImage(images[currentState], true);
+      if (DEBUG) println("currentState="+currentState);
+      drawReviewImage(images[currentState], currentState);
     }
   }
 
@@ -323,17 +347,15 @@ class PhotoBoothController {
         if (camera3D) {
           draw3DreviewImage(images[review], review);
         } else {
-          drawImage(images[SBS]);
+          drawReviewImage(images[REVIEW], REVIEW);
         }
       } else {
         fill(255);
         text("NO IMAGES", screenWidth/4, screenHeight);
       }
     } else { // collage not tested for 3D mode TODO
-      if (collage2x2 != null) {
-        float bw = (cameraWidth-(cameraHeight*printAspectRatio))/2.0;
-        int sx = int(bw);
-        image(collage2x2, sx/2, 0, collage2x2.width/4, collage2x2.height/4);
+      if (collage[review] != null) {
+        drawReviewImage(collage[review], review);
       }
     }
   }
@@ -373,14 +395,13 @@ class PhotoBoothController {
     else {
       endPhotoShoot = false;
       isPhotoShoot = false;
-      background(0);
     }
   }
 
   public void processImage(PImage input) {
     if (input == null) return;  // null when still initializing
     currentRawImage = input.get();
-    currentImage = imageProcessor.processImage(currentRawImage);
+    currentImage = imageProcessor.processImage(input);
     if (camera3D) {
       if (anaglyph) {  //check for anaglyph because aspect ratio reduced
         draw3DliveviewImage(currentImage, LIVEVIEW_ANAGLYPH);
@@ -395,6 +416,7 @@ class PhotoBoothController {
 
   public void startPhotoShoot(int start) {
     if (isPhotoShoot) return; // return when already in countdown shoot mode
+    if (DEBUG) println("Start photo shoot countdown -----------------------------");
     isPhotoShoot = true;
     countdownDigit = start+1;
     if (noCountDown) {
@@ -402,26 +424,25 @@ class PhotoBoothController {
       countdownDigit = 1; // smile only before shutter
     }
 
-    Timer timer = new Timer();
+    countdownTimer = new Timer();
     // define a task to decrement the countdown digit every second
     TimerTask task = new TimerTask() {
       public void run() {
         countdownDigit--;
         if (countdownDigit < 0) {
           // stop the timer when the countdown reaches 0
-          timer.cancel();
+          countdownTimer.cancel();
         }
       }
     };
     // start the timer
-    timer.scheduleAtFixedRate(task, 0, 1000);
+    countdownTimer.scheduleAtFixedRate(task, 0, 1000);
   }
 
   public void endPhotoShoot() {
     endPhotoShoot = true;
     oldShootCounter = 0;
-    if (DEBUG) println("endPhotoShoot drawPrevious()");
-    drawPrevious();
+    if (DEBUG) println("endPhotoShoot ******************");
   }
 
   // draw photo shoot count down digits
@@ -473,14 +494,16 @@ class PhotoBoothController {
       fill(255);
     } else if (digit == -1) {
       // flash screen and take photo
-      background(0);
+      //background(0);
       takePhoto(doubleTrigger, false);  // take photo
       boolean done = incrementState();
       if (done) {
+        if (DEBUG) println("Done currentState = "+currentState +
+          " numberOfPanels="+numberOfPanels+" isPhotoShoot="+isPhotoShoot);
         drawPrevious();
+        // show Saved message with date and time
         String saved = "Saved "+datetime;
         float tw = textWidth(saved);
-
         if (orientation == LANDSCAPE) {
           pushMatrix();
           translate(screenWidth/2, screenHeight/24);
@@ -495,24 +518,24 @@ class PhotoBoothController {
           text(saved, 0, 0);
           popMatrix();
         }
-        if (numberOfPanels == 4) {
-          if (DEBUG) println("save collage2x2 " + datetime);
-          PGraphics pg = saveCollage(collage, OUTPUT_FOLDER_PATH, OUTPUT_COMPOSITE_FILENAME, datetime, fileType);
-          collage2x2 = pg.copy();
-          pg.dispose();
-          drawCollage(collage2x2);
-        }
+      } else {
+        if (DEBUG) println("currentState = "+currentState + " numberOfPanels="+numberOfPanels);
+        if (DEBUG) println("isPhotoShoot="+isPhotoShoot);
+        isPhotoShoot = false;
+        tryPhotoShoot();
       }
     }
   }
 
-  // not tested for 3D
+  // not tested for 3D anaglyph
   void drawCollage(PImage img) {
     if (img != null) {
-      float bw = (screenWidth-(screenHeight*printAspectRatio))/2.0;
-      int sx = int(bw);
+      background(0);
+      //float bw = (screenWidth-(screenHeight/printAspectRatio))/2.0;
+      //int sx = int(bw);
       //image(collage2x2, sx/2, 0, collage2x2.width/4, collage2x2.height/4);
-      image(img, sx, 0, img.width/(2*cameraHeight/screenHeight), img.height/(2*cameraHeight/screenHeight));
+      //image(img, sx, 0, img.width/(2*cameraHeight/screenHeight), img.height/(2*cameraHeight/screenHeight));
+      image(img, img.height*screenAspectRatio, screenHeight);
     }
   }
 
@@ -537,9 +560,9 @@ class PhotoBoothController {
     if (saveRaw) {
       if (DEBUG) println("save unfiltered photo from camera"+ currentState + " " + datetime);
       if (camera3D) {
-        saveRaw3DImage(currentRawImage, currentState, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime, rawFileType);
+        saveRawImage(currentRawImage, currentState, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime, rawFileType);
       } else {
-        saveImage(currentRawImage, currentState, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime, fileType);
+        saveRawImage(currentRawImage, currentState, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime, rawFileType);
       }
     }
     if (camera3D) {
@@ -555,8 +578,18 @@ class PhotoBoothController {
     }
     currentState += 1;
     if (currentState >= numberOfPanels) {
+      if (numberOfPanels == 4) {
+        if (DEBUG) println("save collage2x2 " + datetime);
+        PGraphics pg = saveCollage(collage, OUTPUT_FOLDER_PATH, OUTPUT_COMPOSITE_FILENAME, datetime, fileType);
+        collage[4] = pg.copy();
+        pg.dispose();
+        currentState = 0;
+        images[currentState] = collage[4];
+      } else {
+        currentState=0;
+        drawPrevious();
+      }
       done = true;
-      currentState=0;
       endPhotoShoot();
     }
     return done;
@@ -565,20 +598,22 @@ class PhotoBoothController {
   // Save images from 2D cameras
   public void saveImage(PImage img, int index, String outputFolderPath, String outputFilename, String suffix, String filetype) {
     String filename;
+    if (img == null) return;
     // crop and save
     collage[index] = cropForPrint(img, printAspectRatio);  // adjusts for mirror
     filename = outputFolderPath + File.separator + outputFilename + suffix +"_"+ number(index+1) + "_cr"+ "." + filetype;
     collage[index].save(filename);
+    images[index] = collage[index];
     if (orientation == PORTRAIT) {
       setEXIF(filename);
     }
   }
 
   // save images from 3D cameras
-  public void saveRaw3DImage(PImage img, int index, String outputFolderPath, String outputFilename, String suffix, String filetype) {
+  public void saveRawImage(PImage img, int index, String outputFolderPath, String outputFilename, String suffix, String filetype) {
     String filename;
     // crop and save
-    filename = outputFolderPath + File.separator + outputFilename + suffix + "_Raw" + "." + filetype;
+    filename = outputFolderPath + File.separator + outputFilename + suffix +"_"+ number(index+1) + "_Raw" + "." + filetype;
     img.save(filename);
   }
 
@@ -667,7 +702,7 @@ class PhotoBoothController {
   PImage cropForPrint(PImage src, float printAspectRatio) {
     if (DEBUG) println("cropForPrint "+printAspectRatio+ " mirrorPrint="+mirrorPrint+" " +(orientation==LANDSCAPE? "Landscape":"Portrait"));
     // first crop creating a new PImage
-    float bw = (cameraWidth-(cameraHeight/printAspectRatio))/2.0;
+    float bw = (cameraWidth-(cameraHeight*printAspectRatio))/2.0;
     int sx = int(bw);
     int sy = 0;
     int sw = cameraWidth-int(2*bw);
@@ -727,10 +762,11 @@ class PhotoBoothController {
   // draw mask for screen to match print image aspect ratio
   // 4x6 print aspect ratio
   void drawMaskForScreen( float printAspectRatio) {
-    if (format != STEREO_CARD) return;
+    if (format != MONO) return;
+
     float x = 0;
     float y = 0;
-    float w = (screenWidth-(screenHeight/printAspectRatio))/2.0;
+    float w = (screenWidth-(screenHeight*printAspectRatio))/2.0;
     float h = screenHeight;
     fill(0);
     if (numberOfPanels == 4) {
@@ -819,7 +855,7 @@ class PhotoBoothController {
     float y = 0;
     float w = 0;
     float h = 0;
-    //w = (screenWidth-(screenHeight*printAspectRatio)/2.0)/2.0;
+
     w = (screenWidth-(printPxWidth)/2.0)/2.0;
     h = screenHeight;
     //println("w="+w+" h="+h);

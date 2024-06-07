@@ -54,7 +54,7 @@ String pipeline = PIPELINE_BRIO; // default
 String cameraOrientation;
 int orientation = LANDSCAPE;  // Always using landscape presentation for 3D photography although twin cameras may be in portrait orientation
 //int orientation = PORTRAIT;
-boolean camera3D = false; 
+boolean camera3D = false;
 boolean stereoWindow = false; // show stereo window pane work in progress!
 float printWidth= 6;  // inches
 float printHeight = 4; // inches
@@ -63,7 +63,7 @@ int printPxWidth;
 int printPxHeight;
 float printPPI = 300.0;
 
-int numberOfPanels = 1;
+volatile int numberOfPanels = 1;
 boolean mirrorPrint = false;  // mirror photos saved for print by horizontal flip
 boolean mirror = true; // convert image to mirror image
 boolean saveRaw = false; // save original camera image capture without filter
@@ -96,7 +96,7 @@ void readConfig() {
   //configFile = loadJSONObject(sketchPath("config")+File.separator+"config.json");
   configuration = configFile.getJSONObject("configuration");
   //DEBUG = configFile.getBoolean("debug");
-  // for MultiCam.pde 
+  // for MultiCam.pde
   try {
     multiCamEnabled = configFile.getBoolean("multiCamEnabled");
   }
@@ -106,8 +106,9 @@ void readConfig() {
   mirror = configuration.getBoolean("mirrorScreen");
   mirrorPrint = configuration.getBoolean("mirrorPrint");
   try {
-  saveRaw = configuration.getBoolean("saveRaw");
-  } catch (Exception esr) {
+    saveRaw = configuration.getBoolean("saveRaw");
+  }
+  catch (Exception esr) {
     saveRaw = false;
   }
   countdownStart = configuration.getInt("countDownStart");
@@ -151,21 +152,21 @@ void readConfig() {
   catch (Exception en) {
     camera3D = false;
   }
-  
+
   try {
     horizontalOffset = camera.getInt("horizontalOffset");
   }
   catch (Exception en) {
     horizontalOffset = 0;
   }
-  
+
   try {
     verticalOffset = camera.getInt("verticalOffset");
   }
   catch (Exception en) {
     verticalOffset = 0;
   }
-  
+
   if (DEBUG) println("3D camera="+camera3D+ " horizontalOffset="+horizontalOffset+" verticalOffset="+verticalOffset);
   if (DEBUG) println("configuration camera name="+cameraName+ " cameraWidth="+cameraWidth + " cameraHeight="+ cameraHeight);
   if (DEBUG) println("orientation="+(orientation==LANDSCAPE? "Landscape":"Portrait"));
