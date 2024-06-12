@@ -88,7 +88,7 @@ It may be connected to the Internet with a CAT5 cable, but I normally do not con
 Using the Internet for emailing photos is not implemented for the project.
 
 ### Computer Monitor
-The app mirros live view with a LG Full HD 1080P (1920x1080 pixels) 24 inch monitor and attached mini PC to its back. The monitor is 60 Hz with an IPS display that is good for showing photos. The monitor resolution matches the one eye view of the 3D camera. A better option might be a portable monitor with a stand, but the desktop monitor was already available. My monitor has speakers, but is not touch screen. I can see this application using a glasses free computer monitor/TV, but is outside my budget. 
+The app mirrors live view images on a LG Full HD 1080P (1920x1080 pixel), 24 inch monitor and attached mini PC to its back. The monitor is 60 Hz with an IPS display that is good for showing photos. The monitor resolution matches the one eye view of the 3D camera. A better option might be a portable monitor with a stand, but the desktop monitor was already available. My monitor has speakers, but is not touch screen. I can see this application using a glasses free computer monitor/TV, but is outside my budget. 
 
 ### WiFi Portable Router
 The photo booth uses TP-Link AC750 Wi-Fi Travel Router
