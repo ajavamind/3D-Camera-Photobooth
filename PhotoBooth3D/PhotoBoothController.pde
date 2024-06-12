@@ -1,5 +1,5 @@
 // The Photo Booth Controller sequencer for capturing our subject(s) photos
-// Anaglyph only collage not tested or fully implemented
+// 3D Anaglyph only collage not implemented
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -100,19 +100,20 @@ class PhotoBoothController {
   }
 
   private void drawImage(PImage input, boolean overrideMirror) {
+    float imgAR = (float) input.width/ (float)input.height;
     if (mirror && !overrideMirror) {
       pushMatrix();
       scale(-1, 1);
-      image(input, -screenWidth, 0, screenWidth, screenHeight);
+      image(input, -screenWidth+(screenWidth-screenHeight*imgAR)/2, 0, screenHeight*imgAR, screenHeight);
       popMatrix();
     } else {
       if (orientation == LANDSCAPE) {
-        image(input, 0, 0, screenWidth, screenHeight);
+        image(input, (screenWidth-screenHeight*imgAR)/2, 0, screenHeight*imgAR, screenHeight);
       } else {
         pushMatrix();
         translate(width/2, height/2);
         rotate(-PI);
-        image(input, -screenWidth/2, -screenHeight/2, screenWidth, screenHeight);
+        image(input, -screenWidth/2+(screenWidth-screenHeight*imgAR)/2, -screenHeight/2, screenHeight*imgAR, screenHeight);
         popMatrix();
       }
     }
@@ -213,17 +214,18 @@ class PhotoBoothController {
     float hOffset = 0;
     // adjust for display
     if (format == STEREO_CARD) {
-      if (review == LIVEVIEW_ANAGLYPH) { // is a 2D saved image
+      if (review == LIVEVIEW_ANAGLYPH) { // check for 2D anaglyph image
         h = hScreen;
         w = hScreen * arImg;
         hOffset = (wScreen - w)/2.0;
-      } else { // is a 3D SBS live image
+      } else { // is a 3D SBS live image // TODO fill screen instead of trimming
+        //println(" stereo card");
         h = wScreen / (cameraAspectRatio);
         w = wScreen;
         hOffset = (wScreen - w)/2.0;
       }
     } else {
-      if (review == LIVEVIEW_ANAGLYPH) {  // is a 2D saved image
+      if (review == LIVEVIEW_ANAGLYPH) {  // check for 2D anaglyph image
         h = hScreen ;
         w = hScreen * arImg;
         hOffset = (wScreen - w)/2.0;
@@ -395,6 +397,7 @@ class PhotoBoothController {
     else {
       endPhotoShoot = false;
       isPhotoShoot = false;
+      background(0);
     }
   }
 
@@ -698,12 +701,17 @@ class PhotoBoothController {
     return img;
   }
 
-  // crop for printing 2D photo or 2D collage
+  // crop for printing 2D photo or 2D collage using print paper aspect ratio
   PImage cropForPrint(PImage src, float printAspectRatio) {
     if (DEBUG) println("cropForPrint "+printAspectRatio+ " mirrorPrint="+mirrorPrint+" " +(orientation==LANDSCAPE? "Landscape":"Portrait"));
-    // first crop creating a new PImage
+    float imgAR = (float) src.width / (float) src.height;
+    if (DEBUG) println("imgAR="+imgAR);
+    // crop creating a new PImage
+    //float bw = (printPxWidth); // pixel width for printer at 300 dpi
     float bw = (cameraWidth-(cameraHeight*printAspectRatio))/2.0;
-    int sx = int(bw);
+    if (DEBUG) println(">>>bw="+bw);
+    int iw = int(bw);
+    int sx = iw;
     int sy = 0;
     int sw = cameraWidth-int(2*bw);
     int sh = cameraHeight;
@@ -711,14 +719,44 @@ class PhotoBoothController {
     int dy = 0;
     int dw = sw;
     int dh = cameraHeight;
+    int dd = dw;
+
+    //// crop creating a new PImage
+    //float bw = (printPxWidth); // pixel width for printer at 300 dpi
+    //if (DEBUG) println(">>>bw="+bw);
+    //int iw = int(bw);
+    //int sx = ((cameraWidth)-iw)/2;
+    //int sy = 0;
+    //int sw = iw;
+    //int sh = src.height;
+    //int dx = 0;
+    //int dy = 0;
+    //int dw = sw;
+    //int dh = src.height;
+    //int dd = src.width;
+
+    if (imgAR < printAspectRatio) {
+      bw = (src.height*printAspectRatio)-src.width;
+      if (DEBUG) println("<<<bw="+bw);
+      sx = 0;
+      sy = 0;
+      sw = src.width;
+      sh = src.height;
+      dx = int(bw/2.0);
+      dy = 0;
+      dd = src.width;
+      dw = int(bw+src.width);
+      dh = src.height;
+    }
+
     PImage img = createImage(dw, dh, RGB);
-    img.copy(src, sx, sy, sw, sh, dx, dy, dw, dh);  // cropped copy
+    img.copy(src, sx, sy, sw, sh, dx, dy, dd, dh);  // cropped copy
     // next mirror image if needed
     if (mirrorPrint && orientation == PORTRAIT) {
       PGraphics pg;
       pg = createGraphics(dw, dh);
       pg.beginDraw();
-      pg.background(0);
+      pg.background(255);
       pg.pushMatrix();
       pg.scale(-1, 1);
       pg.image(img, -dw, 0, dw, dh);  // horizontal flip
@@ -731,7 +769,7 @@ class PhotoBoothController {
       PGraphics pg;
       pg = createGraphics(dw, dh);
       pg.beginDraw();
-      pg.background(0);
+      pg.background(255);
       pg.pushMatrix();
       pg.translate(dw/2, dh/2);
       pg.rotate(PI);
@@ -745,7 +783,7 @@ class PhotoBoothController {
       PGraphics pg;
       pg = createGraphics(dw, dh);
       pg.beginDraw();
-      pg.background(0);
+      pg.background(255);
       pg.pushMatrix();
       pg.scale(-1, 1);
       pg.image(img, -dw, 0, dw, dh);  // horizontal flip

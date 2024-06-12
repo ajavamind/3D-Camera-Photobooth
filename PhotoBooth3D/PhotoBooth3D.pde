@@ -15,7 +15,7 @@ import java.util.Locale;
 private static final boolean DEBUG = true;
 private static final boolean DEBUGKEY = false;
 private static final boolean DEBUG_ONSCREEN = false;
-String VERSION = "3D 2.1";
+String VERSION = "3D 2.2";
 
 Capture video;
 private final static int NUM_BUFFERS = 2;
@@ -64,6 +64,7 @@ String[][] legend;
 String[] cameras = null;
 int cameraIndex = 0;
 boolean showCameras = false;
+boolean clearBackground = false;
 boolean screenshot = false;
 int screenshotCounter = 1;
 boolean printing = false;
@@ -225,6 +226,10 @@ public void draw() {
     saveScreenshot();
     return;
   }
+  if (clearBackground) {
+    clearBackground = false;
+    background(0);
+  }
 
   if (video == null) {
     background(0);
@@ -255,8 +260,8 @@ public void draw() {
     camIndex = nextIndex;
     nextIndex++;
     nextIndex = nextIndex & 1; // alternating 2 buffers
-  }
-
+  }                                                                                                                         
+  
   if (photoBoothController.endPhotoShoot) {
     photoBoothController.lastPhoto(); // keep drawing last photo taken for 2 seconds using oldShootCounter as a frame counter
   } else {
@@ -337,6 +342,7 @@ void showCamerasList() {
   text("doubleTrigger="+doubleTrigger, horzAdj, vertAdj*(i++));
   text("doubleTriggerDelay="+doubleTriggerDelay+" ms", horzAdj, vertAdj*(i++));
   text("numberOfPanels="+numberOfPanels, horzAdj, vertAdj*(i++));
+  text("config filename="+configFilename, horzAdj, vertAdj*(i++));
 }
 
 // Draw instruction and event text on screen

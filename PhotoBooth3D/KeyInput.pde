@@ -128,7 +128,7 @@ void keyPressed() {
     keyCode = 0;
   }
   // save for main loop
-  // we do not do any other work in the callback thread!
+  // we do not do any other work in this callback thread!
   lastKey = key;
   lastKeyCode = keyCode;
 }
@@ -310,6 +310,7 @@ int keyUpdate() {
     break;
   case KEYCODE_TAB:
     showCameras = ! showCameras;
+    if (!showCameras) clearBackground = true;
     break;
   case KEYCODE_QUESTION_MARK:
     review = setLiveview();

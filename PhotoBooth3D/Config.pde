@@ -6,6 +6,7 @@ private final static int JAVA_MODE = 0;
 private final static int ANDROID_MODE = 1;
 int buildMode = JAVA_MODE;
 
+String configFilename;
 int screenWidth = 1920; // default
 int screenHeight = 1080;  // default
 float screenAspectRatio;
@@ -79,15 +80,24 @@ JSONObject camera;
 JSONObject printer;
 
 void initConfig() {
+  String name = sketchPath()+File.separator+"config"+File.separator+"lastUsedConfig.txt";
+  if (DEBUG) println(name);
+  String[] lines = loadStrings(name);
+  if (lines == null) {
+    configFilename = "my_config.json";
+  } else {
+    configFilename = lines[0];
+  }
+  if (DEBUG) println("Last used config filename="+configFilename);
   if (buildMode == JAVA_MODE) {
-    readConfig();
+    readConfig(configFilename);
   } else if (buildMode == ANDROID_MODE) {
-    //readAConfig();  // TODO call different configuration function for Android
+    //readAndroidConfig();  // TODO call different configuration function for Android
   }
 }
 
-void readConfig() {
-  String filenamePath = sketchPath()+File.separator+"config"+File.separator+"my_config.json";
+void readConfig(String configFilename) {
+  String filenamePath = sketchPath()+File.separator+"config"+File.separator+configFilename;
   if (!fileExists(filenamePath)) {
     filenamePath = sketchPath()+File.separator+"config"+File.separator+"config.json"; // default for development code test
   }
