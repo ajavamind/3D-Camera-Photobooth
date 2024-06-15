@@ -252,7 +252,16 @@ class PhotoBoothController {
         }
         popMatrix();
       } else {
-        image(img, hOffset, (screenHeight-h)/2.0, w, h);
+        //image(img, hOffset, (screenHeight-h)/2.0, w, h);
+        if (zoomPhoto) {
+          if (zoomPhotoIndex == 0) {  // left eye image
+            image(img, hOffset, -(screenHeight-h)/2.0, 2*w, 2*h);
+          } else {  // right eye image
+            image(img, hOffset-w, -(screenHeight-h)/2.0, 2*w, 2*h);
+          }
+        } else {
+          image(img, hOffset, (screenHeight-h)/2.0, w, h);
+        }
       }
     }
     if (DEBUG_ONSCREEN) {

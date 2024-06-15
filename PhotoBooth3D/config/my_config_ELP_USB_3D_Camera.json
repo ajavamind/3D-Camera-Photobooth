@@ -6,10 +6,11 @@
 		"outputFolderPath": "C:\\Apache24\\htdocs\\data\\images",
 		"IPaddress": "192.168.1.131",
 		"mirrorScreen": false,
+		"mirrorPrint": false,
 		"countDownStart": 3,
 		"fileType": "jpg",
 		"eventText": "3D Camera Photo Booth",
-		"instructionLineText": "Look at Camera",
+		"instructionLineText": "^Look at Camera^",
 		"finalCountdownText": "Freeze!",
 	},
 	"display": {

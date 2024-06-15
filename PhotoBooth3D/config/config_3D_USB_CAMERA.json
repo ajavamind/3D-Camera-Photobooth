@@ -5,6 +5,7 @@
 		"outputFolderPath": "C:\\Apache24\\htdocs\\data\\images",
 		"IPaddress": "192.168.0.100",
 		"mirrorScreen": true,
+		"mirrorPrint": false,
 		"countDownStart": 3,
 		"fileType": "jpg",
 		"eventText": "Your Photo Booth Event",
@@ -26,8 +27,8 @@
 		"3D_comment1": "horizontalOffset adjusts the parallax, positive or negative.",
 		"3D_comment2": "verticalOffset corrects vertical alignment of left and right image views.",
 		"3D": true,
-		"horizontalOffset": 95,
-		"verticalOffset": 0,
+		"horizontalOffset": 58,
+		"verticalOffset": -12,
     },
 	"printer": {
 		"name": "Canon Selphy 1300",

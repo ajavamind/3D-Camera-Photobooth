@@ -12,6 +12,7 @@ static final int KEYCODE_ESC = 27;
 static final int KEYCODE_SPACE = 32;
 static final int KEYCODE_COMMA = 44;
 static final int KEYCODE_MINUS = 45;
+static final int KEYCODE_UNDERSCORE = 45;
 static final int KEYCODE_PERIOD = 46;
 static final int KEYCODE_SLASH = 47;
 static final int KEYCODE_QUESTION_MARK = 47;
@@ -209,6 +210,18 @@ int keyUpdate() {
     if (camera3D) {
       anaglyph = !anaglyph;
       if (DEBUG) println("anadglyph="+anaglyph);
+    }
+    break;
+  case KEYCODE_PLUS:  // toggle zoom image for checking focus of camera
+    if (camera3D) {
+      zoomPhoto = !zoomPhoto;
+      if (DEBUG) println("zoomPhoto="+zoomPhoto);
+    }
+    break;
+  case KEYCODE_MINUS:  // toggle left or right zoom image for checking focus of camera
+    if (camera3D) {
+      zoomPhotoIndex = (zoomPhotoIndex+1) & 1;
+      if (DEBUG) println("zoomPhotoIndex="+zoomPhotoIndex);
     }
     break;
   case KEYCODE_E:  // swap left and right eye views

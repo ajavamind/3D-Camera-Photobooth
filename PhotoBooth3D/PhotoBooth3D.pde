@@ -51,9 +51,11 @@ int review = LIVEVIEW; // default no review available yet, live view SBS
 // 3D output for stereo card format 6x4 print
 private static final int MONO = 0;  // 2D Card
 private static final int PARALLEL = 1;  // SBS 3D
-private static final int STEREO_CARD = 2; // Stereo card for stereoscope viewing
+private static final int STEREO_CARD = 2; // Stereo card for viewing with a stereoscope
 int format = PARALLEL;  // default - feature used for cropping SBS for printing stereo card
 
+// Legends are description pages of key code commands available for the booth operator
+// These are read from text files in the data folder
 int legendPage = -1;
 int LEGENDS = 3;
 String[] legend1;
@@ -82,6 +84,7 @@ public void setup() {
   }
   FRAME_RATE = cameraFrameRate;  // Processing loop frame rate
   fullScreen(RENDERER);
+  // debug renderer options
   //size(1080, 1920, RENDERER);  // for debug vertical monitor for portrait display, used with 2D camera
   //size(1920, 1080, RENDERER);  // matches monitor for landscape 3D
   //size(3840, 2160, RENDERER);  // for debug with 4K monitor
@@ -95,7 +98,7 @@ public void setup() {
   smooth();
 
   // font type and size setup
-  font = loadFont("SansSerif-64.vlw");
+  font = loadFont("SansSerif-64.vlw"); // font file in data folder
   textFont(font);
   if (screenWidth >= 3840) {
     fontSize = 96;
@@ -328,6 +331,7 @@ void showCamerasList() {
   }
   // show configuration list
   i++;
+  text("Camera Width="+cameraWidth + " Height="+ cameraHeight, horzAdj, vertAdj*(i++));
   text("FRAME_RATE="+FRAME_RATE, horzAdj, vertAdj*(i++));
   text("camera3D="+(camera3D==true ? "ON": "OFF"), horzAdj, vertAdj*(i++));
   text("saveRaw="+(saveRaw==true ? "ON": "OFF"), horzAdj, vertAdj*(i++));

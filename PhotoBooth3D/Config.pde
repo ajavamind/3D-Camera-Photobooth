@@ -2,6 +2,9 @@
 // Looks for file my.config.json
 // If not found uses config.json the developer default file - do not change config.json
 
+String osName;   // "Linux", "Windows", "Android", "iOS"
+boolean isWindows;
+boolean isLinux;
 private final static int JAVA_MODE = 0;
 private final static int ANDROID_MODE = 1;
 int buildMode = JAVA_MODE;
@@ -70,6 +73,8 @@ boolean mirror = true; // convert image to mirror image
 boolean saveRaw = false; // save original camera image capture without filter
 boolean anaglyph = false; // show 3D image as anaglyph
 boolean crosseye = false; // left and right eye views interchanged
+boolean zoomPhoto = false; // zoom image to verify dual camera focus for test or setup
+int zoomPhotoIndex = 0; // zoom left (0) or right (1) to verify dual camera focus for test or setup
 
 int countdownStart = 3;  // seconds
 String ipAddress;  // photo booth computer IP Address
@@ -80,6 +85,11 @@ JSONObject camera;
 JSONObject printer;
 
 void initConfig() {
+  String osName = System.getProperty("os.name");
+  if (DEBUG) println("osName="+osName);
+  isWindows = System.getProperty("os.name").startsWith("Windows");
+  isLinux = System.getProperty("os.name").startsWith("Linux");
+
   String name = sketchPath()+File.separator+"config"+File.separator+"lastUsedConfig.txt";
   if (DEBUG) println(name);
   String[] lines = loadStrings(name);

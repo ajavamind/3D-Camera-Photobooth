@@ -19,7 +19,7 @@
 		"height": 1080,
 	},
     "camera": {
-    	"name": "QooCam EGO #2",
+    	"name": "HD Pro Webcam C920",
 		"description": "Camera WebCam UVC mode",
 		"type": "single",
         "width": 1920,
