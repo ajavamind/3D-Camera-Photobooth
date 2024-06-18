@@ -1,10 +1,10 @@
 Key Command Legend page 1
 
-?/ - Toggle key command legend pages
+?/ - Toggle through key command legend pages
 Enter - Start countdown capture
 Left mouse button - Start single photo capture
 ESC or Center mouse button - Toggle Review last photo
-Right mouse button - Start  capture
+Right mouse button - (2D) Start collage capture or (3D) Anaglyph mode
 S - Single photo mode
 C - Collage photo mode (frame only)
 A - Anaglyph toggle with Side by Side

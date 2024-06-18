@@ -6,10 +6,10 @@ RIGHT - More positive parallax, places subject behind the stereo window
 UP    - Increase vertical alignment
 DOWN  - Decrease vertical alignment
 
++/=   - Zoom 2x to check lens focus
+-/_   - Toggle left or right eye view for Zoom
+
 E - Swap left and right eye images
-
-
-
 
 
 

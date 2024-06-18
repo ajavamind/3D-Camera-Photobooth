@@ -212,6 +212,7 @@ class PhotoBoothController {
     float h = 0;
     float w = 0;
     float hOffset = 0;
+    float vOffset = 0;
     // adjust for display
     if (format == STEREO_CARD) {
       if (review == LIVEVIEW_ANAGLYPH) { // check for 2D anaglyph image
@@ -252,12 +253,13 @@ class PhotoBoothController {
         }
         popMatrix();
       } else {
-        //image(img, hOffset, (screenHeight-h)/2.0, w, h);
         if (zoomPhoto) {
           if (zoomPhotoIndex == 0) {  // left eye image
-            image(img, hOffset, -(screenHeight-h)/2.0, 2*w, 2*h);
+            image(img, 0, -(screenHeight-h)/2.0, 2*w, 2*h);
+            text("Left", 20, height/2);
           } else {  // right eye image
-            image(img, hOffset-w, -(screenHeight-h)/2.0, 2*w, 2*h);
+            image(img, horizontalOffset-w,-verticalOffset-(screenHeight-h)/2.0, 2*w, 2*h);
+            text("Right", 20, height/2);
           }
         } else {
           image(img, hOffset, (screenHeight-h)/2.0, w, h);

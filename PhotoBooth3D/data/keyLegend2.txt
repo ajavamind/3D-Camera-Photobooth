@@ -7,7 +7,7 @@ B - Toggle SaveRaw unfiltered image from camera
 M - Toggle Mirror
 P - Portrait mode
 L - Landscape mode
-T - Screen mask for 6x4 print toggle (default)
+T - Toggle Stereo Card mode for 6x4 print
 N - Toggle Mirror Prints
 U - Save Screenshot
 W - Print Review Photo
