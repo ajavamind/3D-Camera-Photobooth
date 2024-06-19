@@ -59,6 +59,7 @@ String cameraOrientation;
 int orientation = LANDSCAPE;  // Always using landscape presentation for 3D photography although twin cameras may be in portrait orientation
 //int orientation = PORTRAIT;
 boolean camera3D = false;
+boolean cameraRtsp = false;
 boolean stereoWindow = false; // show stereo window pane work in progress!
 float printWidth= 6;  // inches
 float printHeight = 4; // inches
@@ -172,7 +173,12 @@ void readConfig(String configFilename) {
   catch (Exception en) {
     camera3D = false;
   }
-
+  try {
+    cameraRtsp = camera.getBoolean("rtsp");
+  }
+  catch (Exception er) {
+  }
+  if (DEBUG) println("cameraRtsp="+cameraRtsp);
   try {
     horizontalOffset = camera.getInt("horizontalOffset");
   }

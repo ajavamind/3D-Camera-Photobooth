@@ -204,6 +204,7 @@ class PhotoBoothController {
   //}
 
   private void draw3DliveviewImage(PImage img, int review) {
+    if (img == null) return;
     float hImg= img.height;
     float wImg = img.width;
     float arImg = wImg/hImg;  // aspect ratio of image
@@ -275,6 +276,7 @@ class PhotoBoothController {
   }
 
   private void draw3DreviewImage(PImage img, int index) {
+    if (img == null) return;
     float hImg= img.height;
     float wImg = img.width;
     float arImg = wImg/hImg;  // aspect ratio of image

@@ -142,7 +142,7 @@ public void setup() {
     delay(200); // wait 200 Ms between retries to get the camera list
   }
 
-  if (cameras == null || cameras.length == 0) {
+  if (cameras == null || cameras.length == 0 && !cameraRtsp) {
     if (DEBUG) println("There are no cameras available for capture.");
     video = null;
   } else {
@@ -154,8 +154,9 @@ public void setup() {
         cameraIndex = i;
       }
     }
-
-    if (DEBUG) println("Found Camera: "+cameras[cameraIndex]+".");
+    if (cameras.length > 0) {
+      if (DEBUG) println("Found Camera: "+cameras[cameraIndex]+".");
+    }
 
     //String dev = cameras[cameraIndex].substring(0,cameras[cameraIndex].lastIndexOf(" #"));
     //println(dev+".");
@@ -168,7 +169,7 @@ public void setup() {
     // The camera can be initialized directly using an
     // element from the array returned by list()
     // default first camera found at index 0
-    if (camAvailable) {
+    if (camAvailable || (cameraRtsp && pipeline != null) ) {
 
       //video = new Capture(this, cameras[cameraIndex]);  // using default pipeline only captured low resolution of camera example 640x480 for HD Pro Webcam C920
       // pipeline for windows 10 - captures full HD 1920x1080 for HD Pro Webcam C920
@@ -181,6 +182,7 @@ public void setup() {
         if (DEBUG) println("Using camera: " + cameras[cameraIndex] );
       }
       video.start();
+      if (DEBUG) println("Video start");
     }
   }
 
@@ -263,8 +265,8 @@ public void draw() {
     camIndex = nextIndex;
     nextIndex++;
     nextIndex = nextIndex & 1; // alternating 2 buffers
-  }                                                                                                                         
-  
+  }
+
   if (photoBoothController.endPhotoShoot) {
     photoBoothController.lastPhoto(); // keep drawing last photo taken for 2 seconds using oldShootCounter as a frame counter
   } else {
@@ -319,8 +321,13 @@ void showCamerasList() {
   int i = 0;
   String appd = "";
   if (cameras.length == 0) {
-    appd = "No Cameras Available";
+    if (cameraRtsp) {
+      appd = "RTSP Camera";
+    } else {
+      appd = "No Cameras Available";
+    }
     text(appd, horzAdj, vertAdj*(i+1));
+    i++;
   } else {
     while ( i < cameras.length) {
       appd = "";

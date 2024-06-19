@@ -1,7 +1,8 @@
 config_EGO_3D.json
+config_Rtsp_Jedeye_2_3D_CAMERA.json
+config_3D_USB_CAMERA.json
 my_config_3D_GxiVision_Webcam.json
 my_config.json
 config_ANTVR_CAP_3D.json
-config_3D_USB_CAMERA.json
 my_config_2D.json
 my_config_2D_GxiVision_S16M01.json
