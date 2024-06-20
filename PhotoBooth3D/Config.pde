@@ -28,12 +28,13 @@ int doubleTriggerDelay = doubleTriggerDelayMin;
 int horizontalOffset = 0;
 int verticalOffset = 0;
 
-String eventText;
-String instructionLineText;
+String eventText = "3D Camera Photo Booth";
+String eventInfoText = "3D Camera Photo Booth";
+String instructionLineText = "";
 String featureText = "Stereo Card Print Format";
 String finalCountdownText = "Freeze!";
+String titleText="3D Camera Photo Booth";
 
-String titleText="3D Photo Booth";
 String OUTPUT_FILENAME = "IMG_";
 String OUTPUT_COMPOSITE_FILENAME = "IMG_";
 String OUTPUT_FOLDER_PATH="output";  // where to store photos
@@ -89,22 +90,39 @@ void initConfig() {
   String osName = System.getProperty("os.name");
   if (DEBUG) println("osName="+osName);
   isWindows = System.getProperty("os.name").startsWith("Windows");
-  isLinux = System.getProperty("os.name").startsWith("Linux");
+  isLinux = System.getProperty("os.name").startsWith("Linux");   // sketch works with linux except printing TODO
 
   String name = sketchPath()+File.separator+"config"+File.separator+"lastUsedConfig.txt";
   if (DEBUG) println(name);
   String[] lines = loadStrings(name);
-  if (lines == null) {
-    configFilename = "my_config.json";
-  } else {
-    configFilename = lines[0];
-  }
+  configFilename = pickConfigFilename(lines);
   if (DEBUG) println("Last used config filename="+configFilename);
+  
   if (buildMode == JAVA_MODE) {
     readConfig(configFilename);
   } else if (buildMode == ANDROID_MODE) {
     //readAndroidConfig();  // TODO call different configuration function for Android
   }
+}
+
+/**
+ * Pick configuration filename starting with * character from array of Strings 
+ * Ignore all other lines
+ * 
+ */
+String pickConfigFilename(String[] lines) {
+  String filename = "my_config.json";  // default configuration filename
+  if (lines == null) {
+  } else if (lines.length == 0) {
+  } else {
+    for (int i=0; i<lines.length; i++) {
+      if (lines[i].startsWith("*")) {
+        filename = lines[i].substring(1);
+        break;
+      } 
+    }
+  }
+  return filename;
 }
 
 void readConfig(String configFilename) {
@@ -140,6 +158,11 @@ void readConfig(String configFilename) {
   instructionLineText = configuration.getString("instructionLineText");
   if (DEBUG) println("instructionLineText=\""+instructionLineText+"\"");
   eventText = configuration.getString("eventText");
+  try {
+    eventInfoText = configuration.getString("eventInfoText");
+  }
+  catch (Exception ei) {
+  }
   if (DEBUG) println("eventText=\""+eventText+"\"");
   String countdownText = configuration.getString("finalCountdownText");
   if (countdownText != null) {

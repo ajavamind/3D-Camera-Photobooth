@@ -665,6 +665,7 @@ class PhotoBoothController {
   PImage cropFor3DMaskPrint(PImage src, float printAspectRatio) {
     if (DEBUG) println("cropFor3DMaskPrint print AR="+printAspectRatio);
     if (DEBUG) println("cropFor3DMaskPrint image width="+src.width + " height="+src.height);
+    int parallax = 0;  // used for text 3D stereo window position
     // create a new PImage
     float bw = (printPxWidth); // pixel width for printer at 300 dpi
     if (DEBUG) println("bw="+bw);
@@ -697,16 +698,16 @@ class PhotoBoothController {
     String headerText = eventText;
     float hw = round(((printPxWidth/2)-pg.textWidth(headerText))/2.0);
     if (DEBUG) println("hw="+hw);
-    pg.text(headerText, hw, fontSize );
+    pg.text(headerText, hw+parallax, fontSize );
     pg.text(headerText, dx + hw, fontSize );
 
     // footer
     pg.fill(0);  // black text
     pg.textSize(fontSize);
-    String footerText = titleText;
+    String footerText = eventInfoText;
     float fw = round(((printPxWidth/2)-pg.textWidth(footerText))/2.0);
     if (DEBUG) println("fw="+fw);
-    pg.text(footerText, fw, dh + dd + fontSize );
+    pg.text(footerText, fw+parallax, dh + dd + fontSize );
     pg.text(footerText, dx + fw, dh + dd + fontSize );
     pg.endDraw();
 
@@ -733,20 +734,6 @@ class PhotoBoothController {
     int dw = sw;
     int dh = cameraHeight;
     int dd = dw;
-
-    //// crop creating a new PImage
-    //float bw = (printPxWidth); // pixel width for printer at 300 dpi
-    //if (DEBUG) println(">>>bw="+bw);
-    //int iw = int(bw);
-    //int sx = ((cameraWidth)-iw)/2;
-    //int sy = 0;
-    //int sw = iw;
-    //int sh = src.height;
-    //int dx = 0;
-    //int dy = 0;
-    //int dw = sw;
-    //int dh = src.height;
-    //int dd = src.width;
 
     if (imgAR < printAspectRatio) {
       bw = (src.height*printAspectRatio)-src.width;
