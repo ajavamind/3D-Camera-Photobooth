@@ -15,7 +15,7 @@ import java.util.Locale;
 private static final boolean DEBUG = true;
 private static final boolean DEBUGKEY = false;
 private static final boolean DEBUG_ONSCREEN = false;
-String VERSION = "3D 2.2";
+String VERSION = "3D 2.3";
 
 Capture video;
 private final static int NUM_BUFFERS = 2;
@@ -28,6 +28,8 @@ int fontSize;
 int largeFontSize;
 PhotoBoothController photoBoothController;
 ImageProcessor imageProcessor;
+
+PImage hwsbs;
 
 String RENDERER = JAVA2D; // default recommended RENDERER to avoid unresolved OpenGL GPU problems, but slow video
 // P2D and P3D use OPENGL and graphics processor
@@ -297,8 +299,19 @@ public void draw() {
     image(windowPane, 0, 0);
   }
 
-  // Drawing finished, check for screenshot
+  // Drawing finished, check for screenshot file capture
   saveScreenshot();
+  // Drawing finished, convert for monitor screen mode
+  convertScreen();
+}
+
+void convertScreen() {
+  if (screenMode == HWSBS_SCREEN) {
+    hwsbs = get();
+    background(0);
+    copy(hwsbs, 0,       0, width/2, height, width/8,         0, width/4, height);
+    copy(hwsbs, width/2, 0, width/2, height, width/2+width/8, 0, width/4, height);
+  }
 }
 
 void drawLegend(String[] legend) {
@@ -356,47 +369,61 @@ void showCamerasList() {
   text("config filename="+configFilename, horzAdj, vertAdj*(i++));
 }
 
-// Draw instruction and event text on screen
+// Draw instruction and event title text on screen
 void drawText() {
-  fill(192);
+  fill(192);  // light gray
   if (review <= LIVEVIEW) {
-    float angleText;
+    float angleForText;
     float tw;
     if (orientation == LANDSCAPE) {
-      pushMatrix();
-      tw = textWidth(instructionLineText);
-      translate(screenWidth/2- tw/2, screenHeight/24);
-      text(instructionLineText, 0, 0);
-      popMatrix();
+      drawScreenText(instructionLineText, 0, screenHeight/24);
+      drawScreenText(eventText, 0, screenHeight-screenHeight/32);
 
-      pushMatrix();
-      tw = textWidth(eventText);
-      translate(screenWidth/2- tw/2, screenHeight-screenHeight/32);
-      text(eventText, 0, 0);
-      popMatrix();
       if (format == STEREO_CARD) {
-        pushMatrix();
-        tw = textWidth(featureText);
-        translate(screenWidth/2- tw/2, screenHeight-screenHeight/16-10);
-        text(featureText, 0, 0);
-        popMatrix();
+        drawScreenText(featureText, 0, screenHeight-screenHeight/16-10);
       }
-    } else {  // portrait mode not used yet
-      angleText = radians(270);
+    } else {  // portrait mode not used yet with 3D and then only portrait orientation twin cameras
+      //  TODO use drawScreenText()
+      angleForText = radians(270);
       tw = textWidth(instructionLineText);
       pushMatrix();
       translate(screenWidth/32, screenHeight/2+tw/2);
-      rotate(angleText);
+      rotate(angleForText);
       text(instructionLineText, 0, 0);
       popMatrix();
 
       tw = textWidth(eventText);
       pushMatrix();
       translate(screenWidth-screenWidth/32, screenHeight/2+tw/2);
-      rotate(angleText);
+      rotate(angleForText);
       text(eventText, 0, 0);
       popMatrix();
     }
+  }
+}
+
+void drawScreenText(String txt, int x, int y) {
+  float angleForText;
+  float tw;
+  
+  if (camera3D && !anaglyph) {
+    // draw same text string to left and right eye views on screen
+    pushMatrix();
+    tw = textWidth(txt);
+    translate(x+screenParallax+screenWidth/4- tw/2, y); // left
+    text(txt, 0, 0);
+    popMatrix();
+    pushMatrix();
+    translate(x+screenWidth/4+screenWidth/2- tw/2, y); // right
+    text(txt, 0, 0);
+    popMatrix();
+  } else if (!camera3D || anaglyph) {
+    // draw single text string on screen
+    pushMatrix();
+    tw = textWidth(txt);
+    translate(screenWidth/2- tw/2, y);
+    text(txt, 0, 0);
+    popMatrix();
   }
 }
 
@@ -413,12 +440,13 @@ int drawMessage() {
   }
   //float angleText;
   float tw;
-  fill(255);
-  pushMatrix();
-  tw = textWidth(message);
-  translate(screenWidth/2- tw/2, screenHeight/12);
-  text(message, 0, 0);
-  popMatrix();
+  fill(color(255,255,0)); // yellow
+  //pushMatrix();
+  //tw = textWidth(message);
+  //translate(screenWidth/2- tw/2, screenHeight/12);
+  //text(message, 0, 0);
+  //popMatrix();
+  drawScreenText(message, 0, screenHeight/12);
   messageTimeout--;
   return messageTimeout;
 }

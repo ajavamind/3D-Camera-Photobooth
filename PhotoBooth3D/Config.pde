@@ -10,8 +10,14 @@ private final static int ANDROID_MODE = 1;
 int buildMode = JAVA_MODE;
 
 String configFilename;
+
 int screenWidth = 1920; // default
 int screenHeight = 1080;  // default
+static final int MONO_SCREEN = 0;
+static final int HWSBS_SCREEN = 1;
+static final int COLUMN_SCREEN = 2;
+static final int ROW_SCREEN = 3;
+int screenMode = MONO_SCREEN;  // 2D screen monitor mode default
 float screenAspectRatio;
 int dividerSize = 10; // 2x2 photo collage layout divider line width
 
@@ -27,6 +33,10 @@ int doubleTriggerDelay = doubleTriggerDelayMin;
 
 int horizontalOffset = 0;
 int verticalOffset = 0;
+
+// 3D mode parallax values used for showing text in 3D images at a fixed depth
+int screenParallax = 5;  // for screen text like countdown, event, title text, etc. 
+int printParallax = 0;  // for printed stereo cards 
 
 String eventText = "3D Camera Photo Booth";
 String eventInfoText = "3D Camera Photo Booth";
@@ -126,6 +136,7 @@ String pickConfigFilename(String[] lines) {
 }
 
 void readConfig(String configFilename) {
+  String temp;
   String filenamePath = sketchPath()+File.separator+"config"+File.separator+configFilename;
   if (!fileExists(filenamePath)) {
     filenamePath = sketchPath()+File.separator+"config"+File.separator+"config.json"; // default for development code test
@@ -151,23 +162,24 @@ void readConfig(String configFilename) {
     saveRaw = false;
   }
   countdownStart = configuration.getInt("countDownStart");
-  fileType = configuration.getString("fileType");
-  OUTPUT_FOLDER_PATH = configuration.getString("outputFolderPath");
-  ipAddress = configuration.getString("IPaddress");
+  temp = configuration.getString("fileType");
+  if (temp != null) fileType = temp;
+  temp = configuration.getString("outputFolderPath");
+  if (temp != null) OUTPUT_FOLDER_PATH = temp;
+  temp = configuration.getString("IPaddress");
+  if (temp != null) ipAddress = temp;
   if (DEBUG) println("ipAddress="+ipAddress);
-  instructionLineText = configuration.getString("instructionLineText");
+  temp = configuration.getString("instructionLineText");
+  if (temp != null) instructionLineText = temp;
   if (DEBUG) println("instructionLineText=\""+instructionLineText+"\"");
-  eventText = configuration.getString("eventText");
-  try {
-    eventInfoText = configuration.getString("eventInfoText");
-  }
-  catch (Exception ei) {
-  }
+  temp = configuration.getString("eventText");
+  if (temp != null) eventText = temp;
+  temp = configuration.getString("eventInfoText");
+  if (temp != null) eventInfoText = temp;
   if (DEBUG) println("eventText=\""+eventText+"\"");
-  String countdownText = configuration.getString("finalCountdownText");
-  if (countdownText != null) {
-    finalCountdownText = countdownText;
-  }
+  if (DEBUG) println("eventInfoText=\""+eventInfoText+"\"");
+  temp = configuration.getString("finalCountdownText");
+  if (temp != null) finalCountdownText = temp;
   display = configFile.getJSONObject("display");
   if (display != null) {
     screenWidth = display.getInt("width");

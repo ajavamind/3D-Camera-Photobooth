@@ -199,6 +199,13 @@ int keyUpdate() {
   case KEYCODE_F:
     focusPush();
     break;
+  case KEYCODE_H:  // toggle MONO with Half width SBS
+    if (screenMode == MONO_SCREEN) {
+      screenMode = HWSBS_SCREEN;
+    } else {
+      screenMode = MONO_SCREEN;
+    }
+    break;
   case KEYCODE_R:
     shutterRelease();
     break;

@@ -259,7 +259,7 @@ class PhotoBoothController {
             image(img, 0, -(screenHeight-h)/2.0, 2*w, 2*h);
             text("Left", 20, height/2);
           } else {  // right eye image
-            image(img, horizontalOffset-w,-verticalOffset-(screenHeight-h)/2.0, 2*w, 2*h);
+            image(img, horizontalOffset-w, -verticalOffset-(screenHeight-h)/2.0, 2*w, 2*h);
             text("Right", 20, height/2);
           }
         } else {
@@ -366,7 +366,8 @@ class PhotoBoothController {
         }
       } else {
         fill(255);
-        text("NO IMAGES", screenWidth/4, screenHeight);
+        drawScreenText("NO IMAGES", 0, screenHeight);
+        //text("NO IMAGES", screenWidth/4, screenHeight);
       }
     } else { // collage not tested for 3D mode TODO
       if (collage[review] != null) {
@@ -469,19 +470,20 @@ class PhotoBoothController {
       drawCurrent();
       fill(0x80FFFF80);
       textSize(largeFontSize);
-      String digitS = str(digit);
-      float tw = textWidth(digitS);
-      float th = largeFontSize/2;
+      String digitText = str(digit);
+      float tw = textWidth(digitText);
+      int th = largeFontSize/2;
       if (orientation == LANDSCAPE) {
-        pushMatrix();
-        translate(screenWidth/2, screenHeight/2+th);
-        text(digitS, -tw/2, 0);
-        popMatrix();
+        //pushMatrix();
+        //translate(screenWidth/2, screenHeight/2+th);
+        //text(digitText, -tw/2, 0);
+        //popMatrix();
+        drawScreenText(digitText, 0, screenHeight/2 + th);
       } else {
         pushMatrix();
         translate(screenWidth/2+th, screenHeight/2);
         rotate(-HALF_PI);
-        text(digitS, -tw/2, 0);
+        text(digitText, -tw/2, 0);
         popMatrix();
       }
       textSize(fontSize);
@@ -490,19 +492,20 @@ class PhotoBoothController {
       drawCurrent();
       fill(0x80FFFF80);
       textSize(largeFontSize);
-      String digitS = finalCountdownText;
-      float tw = textWidth(digitS);
-      float th = largeFontSize/2;
+      String digitText = finalCountdownText;
+      float tw = textWidth(digitText);
+      int th = largeFontSize/2;
       if (orientation == LANDSCAPE) {
-        pushMatrix();
-        translate(screenWidth/2, screenHeight/2+th);
-        text(digitS, -tw/2, 0);
-        popMatrix();
+        //pushMatrix();
+        //translate(screenWidth/2, screenHeight/2+th);
+        //text(digitText, -tw/2, 0);
+        //popMatrix();
+        drawScreenText(digitText, 0, screenHeight/2 + th);
       } else {
         pushMatrix();
         translate(screenWidth/2+th, screenHeight/2);
         rotate(-HALF_PI);
-        text(digitS, -tw/2, 0);
+        text(digitText, -tw/2, 0);
         popMatrix();
       }
       focusPush();  // trigger Focus
@@ -518,20 +521,17 @@ class PhotoBoothController {
           " numberOfPanels="+numberOfPanels+" isPhotoShoot="+isPhotoShoot);
         drawPrevious();
         // show Saved message with date and time
-        String saved = "Saved "+datetime;
-        float tw = textWidth(saved);
+        String savedText = "Saved "+datetime;
+        float tw = textWidth(savedText);
         if (orientation == LANDSCAPE) {
-          pushMatrix();
-          translate(screenWidth/2, screenHeight/24);
-          text(saved, -tw/2, 0);
-          popMatrix();
-        } else {
+          drawScreenText(savedText, 0, screenHeight/24);
+        } else {  // TODO 3D for portrait orientation twin cameras
           float angleText = radians(270);
           pushMatrix();
           //translate(screenWidth/2, screenHeight/2);
           translate(screenWidth/32, screenHeight/2+tw/2);
           rotate(angleText);
-          text(saved, 0, 0);
+          text(savedText, 0, 0);
           popMatrix();
         }
       } else {
@@ -665,7 +665,6 @@ class PhotoBoothController {
   PImage cropFor3DMaskPrint(PImage src, float printAspectRatio) {
     if (DEBUG) println("cropFor3DMaskPrint print AR="+printAspectRatio);
     if (DEBUG) println("cropFor3DMaskPrint image width="+src.width + " height="+src.height);
-    int parallax = 0;  // used for text 3D stereo window position
     // create a new PImage
     float bw = (printPxWidth); // pixel width for printer at 300 dpi
     if (DEBUG) println("bw="+bw);
@@ -697,17 +696,18 @@ class PhotoBoothController {
     pg.textSize(fontSize);
     String headerText = eventText;
     float hw = round(((printPxWidth/2)-pg.textWidth(headerText))/2.0);
-    if (DEBUG) println("hw="+hw);
-    pg.text(headerText, hw+parallax, fontSize );
+    if (DEBUG) println("headerText width="+hw+" "+headerText);
+    pg.text(headerText, hw+printParallax, fontSize );
     pg.text(headerText, dx + hw, fontSize );
 
     // footer
     pg.fill(0);  // black text
     pg.textSize(fontSize);
+    println("eventInfoText="+eventInfoText);
     String footerText = eventInfoText;
     float fw = round(((printPxWidth/2)-pg.textWidth(footerText))/2.0);
-    if (DEBUG) println("fw="+fw);
-    pg.text(footerText, fw+parallax, dh + dd + fontSize );
+    if (DEBUG) println("footerText width="+fw + " "+footerText);
+    pg.text(footerText, fw+printParallax, dh + dd + fontSize );
     pg.text(footerText, dx + fw, dh + dd + fontSize );
     pg.endDraw();
 
