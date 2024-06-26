@@ -13,13 +13,16 @@ String configFilename;
 
 int screenWidth = 1920; // default
 int screenHeight = 1080;  // default
+float screenAspectRatio;
+
 static final int MONO_SCREEN = 0;
 static final int HWSBS_SCREEN = 1;
 static final int COLUMN_SCREEN = 2;
 static final int ROW_SCREEN = 3;
 int screenMode = MONO_SCREEN;  // 2D screen monitor mode default
-float screenAspectRatio;
-int dividerSize = 10; // 2x2 photo collage layout divider line width
+int[] displayId = {1, 2};
+static final int MAIN_DISPLAY = 0; // index into displayId array for windows display id
+static final int AUX_DISPLAY = 1;  // 3D display
 
 int cameraWidth = 1920; // default
 int cameraHeight = 1080; // default
@@ -42,8 +45,9 @@ String eventText = "3D Camera Photo Booth";
 String eventInfoText = "3D Camera Photo Booth";
 String instructionLineText = "";
 String featureText = "Stereo Card Print Format";
-String finalCountdownText = "Freeze!";
+String finalCountdownText = "Smile!";
 String titleText="3D Camera Photo Booth";
+int dividerSize = 10; // 2x2 photo collage layout divider line width
 
 String OUTPUT_FILENAME = "IMG_";
 String OUTPUT_COMPOSITE_FILENAME = "IMG_";

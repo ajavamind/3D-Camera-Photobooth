@@ -9,8 +9,8 @@ config_twin_S8.json
 my_config.json
 my_config_2D.json
 my_config_2D_GxiVision_S16M01.json
-my_config_3D_GxiVision_Webcam.json
+*my_config_3D_GxiVision_Webcam.json
 my_config_ELP_USB_3D_Camera.json
 my_config_mf3D_USB.json
 my_config_USB_3D_2560x960.json
-*my_config_World_Stereoscopy_Day.json
+my_config_World_Stereoscopy_Day.json

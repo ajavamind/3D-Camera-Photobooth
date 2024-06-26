@@ -126,85 +126,11 @@ class PhotoBoothController {
     return true;
   }
 
-  //private void draw3DImage(PImage img, int review, boolean overrideMirror) {
-  //  float hImg= img.height;
-  //  float wImg = img.width;
-  //  float arImg = wImg/hImg;  // aspect ratio of image
-  //  float hScreen = (float) screenHeight;
-  //  float wScreen = (float) screenWidth;
-  //  float h = 0;
-  //  float w = 0;
-  //  float hOffset = 0;
-  //  boolean OK = true;
-  //  if (img.width == 0) {
-  //    OK = false;
-  //  }
-  //  // adjust for display
-  //  if (format == STEREO_CARD) {
-  //    if (review == REVIEW) { // is a SBS 3D saved image
-  //      h = wScreen / (cameraAspectRatio/2.0);
-  //      w = wScreen;
-  //    } else if (review >= REVIEW_ANAGLYPH) { // is a 2D saved image
-  //      h = hScreen;
-  //      w = hScreen * arImg;
-  //      hOffset = (wScreen - w)/2.0;
-  //    } else { // is a 3D SBS live image
-  //      h = wScreen / (cameraAspectRatio);
-  //      w = wScreen;
-  //      hOffset = (wScreen - w)/2.0;
-  //    }
-  //  } else {
-  //    if (review == REVIEW) { // is a SBS 3D saved image
-  //      h = wScreen / arImg;
-  //      w = wScreen;
-  //      hOffset = (wScreen - w)/2.0;
-  //    } else if (review >= REVIEW_ANAGLYPH) {  // is a 2D saved image
-  //      //h = (wScreen)/(cameraAspectRatio/2.0);
-  //      h = hScreen ;
-  //      w = hScreen * arImg;
-  //      hOffset = (wScreen - w)/2.0;
-  //    } else {  // is a 3D SBS live image
-  //      h = wScreen / (cameraAspectRatio);
-  //      w = wScreen;
-  //      hOffset = (wScreen - w)/2.0;
-  //    }
-  //  }
-  //  background(0);
-  //  if (mirror && !overrideMirror && review == LIVEVIEW) {
-  //    pushMatrix();
-  //    scale(-1, 1);
-  //    image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
-  //    popMatrix();
-  //  } else {
-  //    if (mirror && !overrideMirror && review >= REVIEW_ANAGLYPH) {
-  //      pushMatrix();
-  //      scale(-1, 1);
-  //      if (screenWidth < screenHeight) {
-  //        image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
-  //      } else {
-  //        image(img, -screenWidth+hOffset, (screenHeight-h), w, h);
-  //      }
-  //      popMatrix();
-  //    } else {
-  //      image(img, hOffset, (screenHeight-h)/2.0, w, h);
-  //    }
-  //  }
-  //  if (DEBUG_ONSCREEN) {
-  //    fill(255);
-  //    text("draw3DImage image "+" w=" + wImg+ " h="+hImg+" arImg="+arImg, 20, height/2-40);
-  //    text("draw3DImage "+" w=" + w+ " h="+h+" review="+review+" override="+overrideMirror, 20, height/2);
-  //    text("draw3DImage "+ " anaglyph="+anaglyph+ " mirror="+mirror, 20, height/2+40);
-  //  }
-  //  if (!OK) {
-  //    fill(128);
-  //    text("NO IMAGES", width/4, height/2);
-  //    println("NO IMAGES");
-  //    review = REVIEW_END;
-  //  }
-  //}
-
-  private void draw3DliveviewImage(PImage img, int review) {
+  private void draw3DliveviewImage(PImage img, int index) {
     if (img == null) return;
+    if (index == LIVEVIEW) {
+      setDisplayImage(img, index);
+    }
     float hImg= img.height;
     float wImg = img.width;
     float arImg = wImg/hImg;  // aspect ratio of image
@@ -216,7 +142,7 @@ class PhotoBoothController {
     float vOffset = 0;
     // adjust for display
     if (format == STEREO_CARD) {
-      if (review == LIVEVIEW_ANAGLYPH) { // check for 2D anaglyph image
+      if (index == LIVEVIEW_ANAGLYPH) { // check for 2D anaglyph image
         h = hScreen;
         w = hScreen * arImg;
         hOffset = (wScreen - w)/2.0;
@@ -227,7 +153,7 @@ class PhotoBoothController {
         hOffset = (wScreen - w)/2.0;
       }
     } else {
-      if (review == LIVEVIEW_ANAGLYPH) {  // check for 2D anaglyph image
+      if (index == LIVEVIEW_ANAGLYPH) {  // check for 2D anaglyph image
         h = hScreen ;
         w = hScreen * arImg;
         hOffset = (wScreen - w)/2.0;
@@ -238,13 +164,13 @@ class PhotoBoothController {
       }
     }
     background(0);
-    if (mirror && review == LIVEVIEW) {
+    if (mirror && index == LIVEVIEW) {
       pushMatrix();
       scale(-1, 1);
       image(img, -screenWidth+hOffset, (screenHeight-h)/2.0, w, h);
       popMatrix();
     } else {
-      if (mirror && review == LIVEVIEW_ANAGLYPH) {
+      if (mirror && index == LIVEVIEW_ANAGLYPH) {
         pushMatrix();
         scale(-1, 1);
         if (screenWidth < screenHeight) {
@@ -270,13 +196,16 @@ class PhotoBoothController {
     if (DEBUG_ONSCREEN) {
       fill(255);
       text("draw3DImage image "+" w=" + wImg+ " h="+hImg+" arImg="+arImg, 20, height/2-40);
-      text("draw3DImage "+" w=" + w+ " h="+h+" review="+review, 20, height/2);
+      text("draw3DImage "+" w=" + w+ " h="+h+" index="+index, 20, height/2);
       text("draw3DImage "+ " anaglyph="+anaglyph+ " mirror="+mirror, 20, height/2+40);
     }
   }
 
   private void draw3DreviewImage(PImage img, int index) {
     if (img == null) return;
+    if (index == REVIEW) {
+      setDisplayImage(img, index);
+    }
     float hImg= img.height;
     float wImg = img.width;
     float arImg = wImg/hImg;  // aspect ratio of image
@@ -474,10 +403,6 @@ class PhotoBoothController {
       float tw = textWidth(digitText);
       int th = largeFontSize/2;
       if (orientation == LANDSCAPE) {
-        //pushMatrix();
-        //translate(screenWidth/2, screenHeight/2+th);
-        //text(digitText, -tw/2, 0);
-        //popMatrix();
         drawScreenText(digitText, 0, screenHeight/2 + th);
       } else {
         pushMatrix();
@@ -496,10 +421,6 @@ class PhotoBoothController {
       float tw = textWidth(digitText);
       int th = largeFontSize/2;
       if (orientation == LANDSCAPE) {
-        //pushMatrix();
-        //translate(screenWidth/2, screenHeight/2+th);
-        //text(digitText, -tw/2, 0);
-        //popMatrix();
         drawScreenText(digitText, 0, screenHeight/2 + th);
       } else {
         pushMatrix();
@@ -586,7 +507,8 @@ class PhotoBoothController {
       if (anaglyph) {
         save3DImage(currentRawImage, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
       } else {
-        save3DImage(currentImage, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
+        //andy check save3DImage(currentImage, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
+        save3DImage(currentRawImage, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
       }
     } else {
       if (DEBUG) println("save 2D photo "+ (currentState+1) + " " + datetime);

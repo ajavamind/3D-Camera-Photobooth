@@ -133,7 +133,7 @@ class ImageProcessor {
    * PImage img SBS image with left and right side-by-side parallel
    * output img size is reduced by horzOffset and vertOffset values
    * horzOffset camera alignment horizontally to adjust stereo window placement parallax
-   * vertOffset adjust camera misalignment vertically for stereoscopic viewing
+   * vertOffset adjust camera misalignment vertically for pleasant (no eye strain) stereoscopic viewing
    * boolean mirror Swap image left and right eye pixel sources
    */
   public PImage alignSBS(PImage img, int horzOffset, int vertOffset, boolean mirror) {

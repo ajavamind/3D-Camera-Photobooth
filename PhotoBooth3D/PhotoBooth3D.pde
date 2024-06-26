@@ -85,7 +85,7 @@ public void setup() {
     format = MONO;
   }
   FRAME_RATE = cameraFrameRate;  // Processing loop frame rate
-  fullScreen(RENDERER);
+  fullScreen(RENDERER, displayId[MAIN_DISPLAY]);  // photo booth main display on monitor 1
   // debug renderer options
   //size(1080, 1920, RENDERER);  // for debug vertical monitor for portrait display, used with 2D camera
   //size(1920, 1080, RENDERER);  // matches monitor for landscape 3D
@@ -173,7 +173,8 @@ public void setup() {
     // default first camera found at index 0
     if (camAvailable || (cameraRtsp && pipeline != null) ) {
 
-      //video = new Capture(this, cameras[cameraIndex]);  // using default pipeline only captured low resolution of camera example 640x480 for HD Pro Webcam C920
+      //video = new Capture(this, cameras[cameraIndex]);  
+      // using default pipeline only captured low resolution of camera example 640x480 for HD Pro Webcam C920
       // pipeline for windows 10 - captures full HD 1920x1080 for HD Pro Webcam C920
 
       if (pipeline != null) {
@@ -191,6 +192,9 @@ public void setup() {
   noStroke();
   noCursor();
   background(0);
+
+  // create half width monitor 2 when configured
+  createDisplay("HWSBS");
 
   imageProcessor = new ImageProcessor();
   windowPane = imageProcessor.createWindowPane();
@@ -213,6 +217,7 @@ public void setup() {
   surface.setTitle(titleText);
   if (DEBUG) println("Renderer: "+RENDERER);
   if (DEBUG) println("finished setup()");
+  
 }
 
 public void draw() {
@@ -302,17 +307,17 @@ public void draw() {
   // Drawing finished, check for screenshot file capture
   saveScreenshot();
   // Drawing finished, convert for monitor screen mode
-  convertScreen();
+  //convertScreen();
 }
 
-void convertScreen() {
-  if (screenMode == HWSBS_SCREEN) {
-    hwsbs = get();
-    background(0);
-    copy(hwsbs, 0,       0, width/2, height, width/8,         0, width/4, height);
-    copy(hwsbs, width/2, 0, width/2, height, width/2+width/8, 0, width/4, height);
-  }
-}
+//void convertScreen() {
+//  if (screenMode == HWSBS_SCREEN) {
+//    hwsbs = get();
+//    background(0);
+//    copy(hwsbs, 0,       0, width/2, height, width/8,         0, width/4, height);
+//    copy(hwsbs, width/2, 0, width/2, height, width/2+width/8, 0, width/4, height);
+//  }
+//}
 
 void drawLegend(String[] legend) {
   fill(255);
@@ -441,11 +446,6 @@ int drawMessage() {
   //float angleText;
   float tw;
   fill(color(255,255,0)); // yellow
-  //pushMatrix();
-  //tw = textWidth(message);
-  //translate(screenWidth/2- tw/2, screenHeight/12);
-  //text(message, 0, 0);
-  //popMatrix();
   drawScreenText(message, 0, screenHeight/12);
   messageTimeout--;
   return messageTimeout;

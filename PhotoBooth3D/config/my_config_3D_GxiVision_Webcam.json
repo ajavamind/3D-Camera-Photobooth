@@ -29,8 +29,8 @@
 		"3D_comment1": "horizontalOffset adjusts the parallax, positive or negative.",
 		"3D_comment2": "verticalOffset corrects vertical alignment of left and right image views.",
 		"3D": true,
-		"horizontalOffset": 112,
-		"verticalOffset": -26,
+		"horizontalOffset": 53,
+		"verticalOffset": -34,
     },
 	"printer": {
 		"name": "Canon Selphy 1300",
