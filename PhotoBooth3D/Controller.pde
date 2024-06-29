@@ -1,5 +1,5 @@
 // The Photo Booth Controller sequencer for capturing our subject(s) photos
-// 3D Anaglyph only collage not implemented
+// 3D Anaglyph only 2x2 collage is not implemented
 
 import java.util.Timer;
 import java.util.TimerTask;

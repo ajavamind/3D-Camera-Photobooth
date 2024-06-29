@@ -11,18 +11,20 @@ int buildMode = JAVA_MODE;
 
 String configFilename;
 
-int screenWidth = 1920; // default
-int screenHeight = 1080;  // default
-float screenAspectRatio;
-
 static final int MONO_SCREEN = 0;
 static final int HWSBS_SCREEN = 1;
 static final int COLUMN_SCREEN = 2;
 static final int ROW_SCREEN = 3;
 int screenMode = MONO_SCREEN;  // 2D screen monitor mode default
-int[] displayId = {1, 2};
-static final int MAIN_DISPLAY = 0; // index into displayId array for windows display id
-static final int AUX_DISPLAY = 1;  // 3D display
+
+Monitor[] monitor = new Monitor[2]; // define two display monitors max for photo booth
+static final int MAIN_DISPLAY = 0; // index for main display
+static final int AUX_DISPLAY = 1;  // optional second display
+
+// Main display parameters
+int screenWidth = 1920; // default
+int screenHeight = 1080;  // default
+float screenAspectRatio;
 
 int cameraWidth = 1920; // default
 int cameraHeight = 1080; // default
@@ -38,8 +40,8 @@ int horizontalOffset = 0;
 int verticalOffset = 0;
 
 // 3D mode parallax values used for showing text in 3D images at a fixed depth
-int screenParallax = 5;  // for screen text like countdown, event, title text, etc. 
-int printParallax = 0;  // for printed stereo cards 
+int screenParallax = 5;  // for screen text like countdown, event, title text, etc.
+int printParallax = 0;  // for printed stereo cards
 
 String eventText = "3D Camera Photo Booth";
 String eventInfoText = "3D Camera Photo Booth";
@@ -111,7 +113,7 @@ void initConfig() {
   String[] lines = loadStrings(name);
   configFilename = pickConfigFilename(lines);
   if (DEBUG) println("Last used config filename="+configFilename);
-  
+
   if (buildMode == JAVA_MODE) {
     readConfig(configFilename);
   } else if (buildMode == ANDROID_MODE) {
@@ -120,9 +122,9 @@ void initConfig() {
 }
 
 /**
- * Pick configuration filename starting with * character from array of Strings 
+ * Pick configuration filename starting with * character from array of Strings
  * Ignore all other lines
- * 
+ *
  */
 String pickConfigFilename(String[] lines) {
   String filename = "my_config.json";  // default configuration filename
@@ -133,7 +135,7 @@ String pickConfigFilename(String[] lines) {
       if (lines[i].startsWith("*")) {
         filename = lines[i].substring(1);
         break;
-      } 
+      }
     }
   }
   return filename;
@@ -145,11 +147,20 @@ void readConfig(String configFilename) {
   if (!fileExists(filenamePath)) {
     filenamePath = sketchPath()+File.separator+"config"+File.separator+"config.json"; // default for development code test
   }
+
+  // initialize required variables with defaults
+  monitor[MAIN_DISPLAY] = new Monitor(1, true); // present and on
+  monitor[AUX_DISPLAY] = new Monitor(2, false); // not present or off
+
+  // get the configuration file json file
   configFile = loadJSONObject(filenamePath);
   //configFile = loadJSONObject("config.json");
   //configFile = loadJSONObject(sketchPath("config")+File.separator+"config.json");
+
+  /* Photo booth configuration section --------------------------------------*/
   configuration = configFile.getJSONObject("configuration");
   //DEBUG = configFile.getBoolean("debug");
+
   // for MultiCam.pde
   try {
     multiCamEnabled = configFile.getBoolean("multiCamEnabled");
@@ -184,12 +195,50 @@ void readConfig(String configFilename) {
   if (DEBUG) println("eventInfoText=\""+eventInfoText+"\"");
   temp = configuration.getString("finalCountdownText");
   if (temp != null) finalCountdownText = temp;
+
+  /* Display section ---------------------------------------------------------*/
   display = configFile.getJSONObject("display");
   if (display != null) {
     screenWidth = display.getInt("width");
     screenHeight = display.getInt("height");
+    monitor[MAIN_DISPLAY].screenWidth = display.getInt("width");
+    monitor[MAIN_DISPLAY].screenHeight = display.getInt("height");
+    monitor[MAIN_DISPLAY].AR = (float)monitor[AUX_DISPLAY].screenWidth/(float)monitor[AUX_DISPLAY].screenHeight;
+    monitor[MAIN_DISPLAY].status = true;
+    monitor[MAIN_DISPLAY].id = 1;
+    temp = display.getString("format");
+    if (temp != null) {
+      monitor[MAIN_DISPLAY].format = temp;
+    } else {
+      monitor[MAIN_DISPLAY].format = "2D";
+    }
   }
   screenAspectRatio = (float)screenWidth/(float)screenHeight;
+  if (DEBUG) println("display id="+monitor[MAIN_DISPLAY].id + " format="+monitor[MAIN_DISPLAY].format);
+
+  display = configFile.getJSONObject("display2");
+  if (display != null) {
+    monitor[AUX_DISPLAY].id = display.getInt("id");
+    monitor[AUX_DISPLAY].screenWidth = display.getInt("width");
+    monitor[AUX_DISPLAY].screenHeight = display.getInt("height");
+    monitor[AUX_DISPLAY].AR = (float)monitor[AUX_DISPLAY].screenWidth/(float)monitor[AUX_DISPLAY].screenHeight;
+    try {
+      monitor[AUX_DISPLAY].status = display.getBoolean("status");
+    }
+    catch (Exception ne) {
+      monitor[AUX_DISPLAY].status = false;
+    }
+    temp = display.getString("format");
+    if (temp != null) {
+      monitor[AUX_DISPLAY].format = temp;
+    } else {
+      monitor[AUX_DISPLAY].format = "2D";
+    }
+  if (DEBUG) println("display id="+monitor[AUX_DISPLAY].id + " format="+monitor[AUX_DISPLAY].format+
+  " status="+monitor[AUX_DISPLAY].status);
+  }
+
+  /* Camera description section ----------------------------------------------*/
   camera = configFile.getJSONObject("camera");
   cameraName = camera.getString("name");
   cameraWidth = camera.getInt("width");
@@ -224,7 +273,6 @@ void readConfig(String configFilename) {
   catch (Exception en) {
     horizontalOffset = 0;
   }
-
   try {
     verticalOffset = camera.getInt("verticalOffset");
   }
@@ -238,6 +286,8 @@ void readConfig(String configFilename) {
   if (DEBUG) println("mirror="+mirror);
   if (DEBUG) println("horizontalOffset="+horizontalOffset);
   if (DEBUG) println("verticalOffset="+verticalOffset);
+
+  /* Printer section -----------------------------------------------------*/
   printer = configFile.getJSONObject("printer");
   if (printer != null) {
     printWidth = printer.getFloat("printWidth");
@@ -258,4 +308,23 @@ boolean fileExists(String filenamePath) {
     return true;
   }
   return false;
+}
+
+/** Display Monitor Description */
+class Monitor {
+  int id; // identifier
+  String format;  // 2D, 3D (side by side left/right), 3DHW (half width side by side left/right)
+  int screenWidth; // configured screen width in pixels (not maximum display width)
+  int screenHeight;  // configured screen height pixels (not maximum display height)
+  boolean status = false; // true: on, false: off or not present
+  float AR; // screen aspect ratio
+
+  // constructor
+  Monitor(int id, boolean status) {
+    this.id = id;
+    this.status = status;
+    screenWidth = 1920;
+    screenHeight = 1080;
+    format = "2D";
+  }
 }

@@ -1,20 +1,25 @@
-// Screen Display sketch
+// Screen Display sketch //<>//
 // Photo booth uses a second display screen to show half width SBS PImages on a 3D monitor or tablet
 
 Display displayMonitor;
 
 void createDisplay(String name) {
-  String[] args = {this.toString() }; // for attaching name stripped by new sketch
-  String[] newArgs = {name };
-  displayMonitor = new Display();
-  PApplet.runSketch(concat(args, newArgs), displayMonitor);
+  if (monitor[AUX_DISPLAY].status) {
+    displayMonitor = new Display();
+    String[] args = {this.toString() }; // for attaching name stripped by new sketch
+    String[] newArgs = {name };
+    PApplet.runSketch(concat(args, newArgs), displayMonitor);
+  }
 }
 
 void setDisplayImage(PImage img, int index) {
-  if (index == LIVEVIEW)
-    displayMonitor.setImage(img, horizontalOffset, verticalOffset);
-  else
-    displayMonitor.setImage(img, 0, 0);  // already adjusted
+  if (displayMonitor == null) return;
+  if (monitor[AUX_DISPLAY].status) {  // assumes 3DHW
+    if (index == LIVEVIEW)
+      displayMonitor.setImage(img, horizontalOffset, verticalOffset);
+    else
+      displayMonitor.setImage(img, 0, 0);  // already adjusted
+  }
 }
 
 class Display extends PApplet {
@@ -22,7 +27,7 @@ class Display extends PApplet {
   PImage sbsImage;
 
   void setImage(PImage img, int horzAdj, int vertAdj) {
-    if (DEBUG) println("horzAdj="+horzAdj + " vertAdj="+vertAdj +" img w="+img.width+ " h="+img.height);
+    //if (DEBUG) println("horzAdj="+horzAdj + " vertAdj="+vertAdj +" img w="+img.width+ " h="+img.height);
     monitorImage = imageProcessor.alignSBS(img, horzAdj, vertAdj, false);
 
     //convert full SBS to half width SBS for 3D Monitor/TV/Tablet
@@ -43,15 +48,15 @@ class Display extends PApplet {
   }
 
   void settings() {
-    fullScreen(RENDERER, displayId[AUX_DISPLAY]);
+    fullScreen(RENDERER, 2);
   }
 
   void setup() {
-    if (DEBUG) println("Display setup()");
+    if (DEBUG) println("Display2 setup()");
     fill(192);
     textSize(96);
-    String message = "3D Display";
-    text(message, width/2- (textWidth(message)/2), height/2);
+    String message = "Display2";
+    text(message, width/2 - (textWidth(message)/2), height/2);
   }
 
   void draw() {

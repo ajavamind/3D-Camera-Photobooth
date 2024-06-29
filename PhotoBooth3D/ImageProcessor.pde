@@ -168,7 +168,7 @@ class ImageProcessor {
         idl = j*dw2 + i;  // adjust index for horzizonal and vertical offsets
         idr = j*dw2 + i + dw;  // adjust index for horzizonal and vertical offsets
         if (isl > tops || isl < 0) {
-          println(" out of bounds tops= "+i+" "+j);
+          //println(" out of bounds tops= "+i+" "+j);
         } else {
           temp.pixels[idl] = img.pixels[isl]; // when in bounds of pixel array, store color
           temp.pixels[idr] = img.pixels[isr]; // when in bounds of pixel array, store color
@@ -223,7 +223,7 @@ class ImageProcessor {
         idl = j*dw2 + i;  // adjust index for horzizonal and vertical offsets
         idr = j*dw2 + i + dw;  // adjust index for horzizonal and vertical offsets
         if (isl > tops || isl < 0) {
-          println(" out of bounds tops= "+i+" "+j);
+          //println(" out of bounds tops= "+i+" "+j);
         } else {
           temp.pixels[idl] = imgL.pixels[isl]; // when in bounds of pixel array, store color
           temp.pixels[idr] = imgR.pixels[isr]; // when in bounds of pixel array, store color
