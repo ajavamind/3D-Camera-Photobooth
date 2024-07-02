@@ -1,30 +1,50 @@
 // Screen Display sketch //<>//
 // Photo booth uses a second display screen to show half width SBS PImages on a 3D monitor or tablet
 
-Display displayMonitor;
+Display auxMonitor;
 
-void createDisplay(String name) {
-  if (monitor[AUX_DISPLAY].status) {
-    displayMonitor = new Display();
+void createAuxDisplay(String name) {
+  if (auxDisplay.status) {
+    auxMonitor = new Display("Display2", auxDisplay);
     String[] args = {this.toString() }; // for attaching name stripped by new sketch
     String[] newArgs = {name };
-    PApplet.runSketch(concat(args, newArgs), displayMonitor);
+    PApplet.runSketch(concat(args, newArgs), auxMonitor);
   }
 }
 
-void setDisplayImage(PImage img, int index) {
-  if (displayMonitor == null) return;
-  if (monitor[AUX_DISPLAY].status) {  // assumes 3DHW
+void setAuxDisplayImage(PImage img, int index) {
+  if (auxMonitor == null) return;
+  if (auxDisplay.status) {  // assumes 3DHW
     if (index == LIVEVIEW)
-      displayMonitor.setImage(img, horizontalOffset, verticalOffset);
+      auxMonitor.setImage(img, horizontalOffset, verticalOffset);
     else
-      displayMonitor.setImage(img, 0, 0);  // already adjusted
+      auxMonitor.setImage(img, 0, 0);  // already adjusted
   }
 }
 
+void convertScreen() {
+  if (mainDisplay.format.equals("3DHW")) {
+    hwsbs = get();
+    background(0);
+    copy(hwsbs, 0, 0, width/2, height, width/8, 0, width/4, height);
+    copy(hwsbs, width/2, 0, width/2, height, width/2+width/8, 0, width/4, height);
+  }
+}
+
+/**
+ * Class for all Auxilary monitors. Each auxilary monitor requires a Display sketch
+ */
 class Display extends PApplet {
+  String name;
+  Monitor monitor;
   PImage monitorImage;
   PImage sbsImage;
+
+  // constructor
+  Display(String name, Monitor monitor) {
+    this.name =  name;
+    this.monitor = monitor;
+  }
 
   void setImage(PImage img, int horzAdj, int vertAdj) {
     //if (DEBUG) println("horzAdj="+horzAdj + " vertAdj="+vertAdj +" img w="+img.width+ " h="+img.height);
@@ -48,14 +68,14 @@ class Display extends PApplet {
   }
 
   void settings() {
-    fullScreen(RENDERER, 2);
+    fullScreen(RENDERER, monitor.id);
   }
 
   void setup() {
-    if (DEBUG) println("Display2 setup()");
+    if (DEBUG) println(name + " setup()");
     fill(192);
     textSize(96);
-    String message = "Display2";
+    String message = name + " Not Ready";
     text(message, width/2 - (textWidth(message)/2), height/2);
   }
 
@@ -66,14 +86,14 @@ class Display extends PApplet {
         image(sbsImage, (width-(sbsImage.width & 0xFFFE))/2, 0, sbsImage.width, sbsImage.height);
       }
     } else {
-      String message = "3D Display";
+      String message = name + "3D Display";
       text(message, width/2- (textWidth(message)/2), height/2);
     }
     noLoop();  // prevent another draw until a new image arrives in setImage
   }
 
   void keyPressed() {
-    if (DEBUGKEY) println("key="+key + " keydecimal=" + int(key) + " keyCode="+keyCode);
+    if (DEBUGKEY) println(name + " key="+key + " keydecimal=" + int(key) + " keyCode="+keyCode);
     //if (DEBUGKEY) Log.d(TAG, "key=" + key + " keyCode=" + keyCode);  // Android
     if (key==ESC) {
       key = 0;

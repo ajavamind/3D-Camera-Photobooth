@@ -2,6 +2,25 @@
 // Looks for file my.config.json
 // If not found uses config.json the developer default file - do not change config.json
 
+/** Display Monitor Description */
+class Monitor {
+  int id; // identifier
+  String format;  // 2D, 3D (side by side left/right), 3DHW (half width side by side left/right)
+  int screenWidth; // configured screen width in pixels (not maximum display width)
+  int screenHeight;  // configured screen height pixels (not maximum display height)
+  boolean status = false; // true: on, false: off or not present
+  float AR; // screen aspect ratio
+
+  // constructor with defaults
+  Monitor(int id, boolean status) {
+    this.id = id;
+    this.status = status;
+    screenWidth = 1920;
+    screenHeight = 1080;
+    format = "2D";
+  }
+}
+
 String osName;   // "Linux", "Windows", "Android", "iOS"
 boolean isWindows;
 boolean isLinux;
@@ -17,9 +36,9 @@ static final int COLUMN_SCREEN = 2;
 static final int ROW_SCREEN = 3;
 int screenMode = MONO_SCREEN;  // 2D screen monitor mode default
 
-Monitor[] monitor = new Monitor[2]; // define two display monitors max for photo booth
-static final int MAIN_DISPLAY = 0; // index for main display
-static final int AUX_DISPLAY = 1;  // optional second display
+// Must be defined as global variable for use by Processing preprocessor
+Monitor mainDisplay = new Monitor(1, true);
+Monitor auxDisplay = new Monitor(2, false); // defaults to not present (false)
 
 // Main display parameters
 int screenWidth = 1920; // default
@@ -148,10 +167,6 @@ void readConfig(String configFilename) {
     filenamePath = sketchPath()+File.separator+"config"+File.separator+"config.json"; // default for development code test
   }
 
-  // initialize required variables with defaults
-  monitor[MAIN_DISPLAY] = new Monitor(1, true); // present and on
-  monitor[AUX_DISPLAY] = new Monitor(2, false); // not present or off
-
   // get the configuration file json file
   configFile = loadJSONObject(filenamePath);
   //configFile = loadJSONObject("config.json");
@@ -201,41 +216,41 @@ void readConfig(String configFilename) {
   if (display != null) {
     screenWidth = display.getInt("width");
     screenHeight = display.getInt("height");
-    monitor[MAIN_DISPLAY].screenWidth = display.getInt("width");
-    monitor[MAIN_DISPLAY].screenHeight = display.getInt("height");
-    monitor[MAIN_DISPLAY].AR = (float)monitor[AUX_DISPLAY].screenWidth/(float)monitor[AUX_DISPLAY].screenHeight;
-    monitor[MAIN_DISPLAY].status = true;
-    monitor[MAIN_DISPLAY].id = 1;
+    mainDisplay.screenWidth = display.getInt("width");
+    mainDisplay.screenHeight = display.getInt("height");
+    mainDisplay.AR = (float)mainDisplay.screenWidth/(float)mainDisplay.screenHeight;
+    mainDisplay.status = true;
+    mainDisplay.id = 1;
     temp = display.getString("format");
     if (temp != null) {
-      monitor[MAIN_DISPLAY].format = temp;
+      mainDisplay.format = temp;
     } else {
-      monitor[MAIN_DISPLAY].format = "2D";
+      mainDisplay.format = "2D";
     }
   }
   screenAspectRatio = (float)screenWidth/(float)screenHeight;
-  if (DEBUG) println("display id="+monitor[MAIN_DISPLAY].id + " format="+monitor[MAIN_DISPLAY].format);
+  if (DEBUG) println("display id="+mainDisplay.id + " format="+mainDisplay.format);
 
   display = configFile.getJSONObject("display2");
   if (display != null) {
-    monitor[AUX_DISPLAY].id = display.getInt("id");
-    monitor[AUX_DISPLAY].screenWidth = display.getInt("width");
-    monitor[AUX_DISPLAY].screenHeight = display.getInt("height");
-    monitor[AUX_DISPLAY].AR = (float)monitor[AUX_DISPLAY].screenWidth/(float)monitor[AUX_DISPLAY].screenHeight;
+    auxDisplay.id = display.getInt("id");
+    auxDisplay.screenWidth = display.getInt("width");
+    auxDisplay.screenHeight = display.getInt("height");
+    auxDisplay.AR = (float)auxDisplay.screenWidth/(float)auxDisplay.screenHeight;
     try {
-      monitor[AUX_DISPLAY].status = display.getBoolean("status");
+      auxDisplay.status = display.getBoolean("status");
     }
     catch (Exception ne) {
-      monitor[AUX_DISPLAY].status = false;
+      auxDisplay.status = false;
     }
     temp = display.getString("format");
     if (temp != null) {
-      monitor[AUX_DISPLAY].format = temp;
+      auxDisplay.format = temp;
     } else {
-      monitor[AUX_DISPLAY].format = "2D";
+      auxDisplay.format = "2D";
     }
-  if (DEBUG) println("display id="+monitor[AUX_DISPLAY].id + " format="+monitor[AUX_DISPLAY].format+
-  " status="+monitor[AUX_DISPLAY].status);
+  if (DEBUG) println("display id="+auxDisplay.id + " format="+auxDisplay.format+
+  " status="+auxDisplay.status);
   }
 
   /* Camera description section ----------------------------------------------*/
@@ -308,23 +323,4 @@ boolean fileExists(String filenamePath) {
     return true;
   }
   return false;
-}
-
-/** Display Monitor Description */
-class Monitor {
-  int id; // identifier
-  String format;  // 2D, 3D (side by side left/right), 3DHW (half width side by side left/right)
-  int screenWidth; // configured screen width in pixels (not maximum display width)
-  int screenHeight;  // configured screen height pixels (not maximum display height)
-  boolean status = false; // true: on, false: off or not present
-  float AR; // screen aspect ratio
-
-  // constructor
-  Monitor(int id, boolean status) {
-    this.id = id;
-    this.status = status;
-    screenWidth = 1920;
-    screenHeight = 1080;
-    format = "2D";
-  }
 }

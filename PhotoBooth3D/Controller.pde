@@ -129,7 +129,7 @@ class PhotoBoothController {
   private void draw3DliveviewImage(PImage img, int index) {
     if (img == null) return;
     if (index == LIVEVIEW) {
-      setDisplayImage(img, index);
+      setAuxDisplayImage(img, index);
     }
     float hImg= img.height;
     float wImg = img.width;
@@ -204,7 +204,7 @@ class PhotoBoothController {
   private void draw3DreviewImage(PImage img, int index) {
     if (img == null) return;
     if (index == REVIEW) {
-      setDisplayImage(img, index);
+      setAuxDisplayImage(img, index);
     }
     float hImg= img.height;
     float wImg = img.width;
