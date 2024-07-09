@@ -205,6 +205,7 @@ void takePhoto(boolean doubleTrigger, boolean shutter) {
   }
 }
 
+// Not used - for reference
 PImage getPhoto(String name) {
   //String name;
   String filename = "";

@@ -22,6 +22,8 @@ void setAuxDisplayImage(PImage img, int index) {
   }
 }
 
+// convert screen image to half width
+// only for main display
 void convertScreen() {
   if (mainDisplay.format.equals("3DHW")) {
     hwsbs = get();
@@ -32,7 +34,8 @@ void convertScreen() {
 }
 
 /**
- * Class for all Auxilary monitors. Each auxilary monitor requires a Display sketch
+ * Class for all Auxilary monitors. 
+ * Each auxilary monitor requires a Display sketch
  */
 class Display extends PApplet {
   String name;

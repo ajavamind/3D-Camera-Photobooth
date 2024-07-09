@@ -15,8 +15,8 @@ class Monitor {
   Monitor(int id, boolean status) {
     this.id = id;
     this.status = status;
-    screenWidth = 1920;
-    screenHeight = 1080;
+    screenWidth = 1920;  // default
+    screenHeight = 1080; // default
     format = "2D";
   }
 }
@@ -37,7 +37,9 @@ static final int ROW_SCREEN = 3;
 int screenMode = MONO_SCREEN;  // 2D screen monitor mode default
 
 // Must be defined as global variable for use by Processing preprocessor
-Monitor mainDisplay = new Monitor(1, true);
+// monitor id fixed on next line, but does not have to be 1
+// moniors must be connected to HDMI numbered port, no gaps in sequence of displays present
+Monitor mainDisplay = new Monitor(1, true);  // monitor id cannot be overwritten by json config
 Monitor auxDisplay = new Monitor(2, false); // defaults to not present (false)
 
 // Main display parameters
@@ -55,8 +57,8 @@ int doubleTriggerDelayMax = 1000;
 int doubleTriggerDelayMin = 200;
 int doubleTriggerDelay = doubleTriggerDelayMin;
 
-int horizontalOffset = 0;
-int verticalOffset = 0;
+volatile int horizontalOffset = 0;
+volatile int verticalOffset = 0;
 
 // 3D mode parallax values used for showing text in 3D images at a fixed depth
 int screenParallax = 5;  // for screen text like countdown, event, title text, etc.
@@ -221,9 +223,9 @@ void readConfig(String configFilename) {
     mainDisplay.AR = (float)mainDisplay.screenWidth/(float)mainDisplay.screenHeight;
     mainDisplay.status = true;
     mainDisplay.id = 1;
-    temp = display.getString("format");
-    if (temp != null) {
-      mainDisplay.format = temp;
+    String tempf = display.getString("format");
+    if (tempf != null) {
+      mainDisplay.format = tempf;
     } else {
       mainDisplay.format = "2D";
     }
@@ -249,8 +251,8 @@ void readConfig(String configFilename) {
     } else {
       auxDisplay.format = "2D";
     }
-  if (DEBUG) println("display id="+auxDisplay.id + " format="+auxDisplay.format+
-  " status="+auxDisplay.status);
+    if (DEBUG) println("display id="+auxDisplay.id + " format="+auxDisplay.format+
+      " status="+auxDisplay.status);
   }
 
   /* Camera description section ----------------------------------------------*/
@@ -313,6 +315,43 @@ void readConfig(String configFilename) {
   printPxHeight = (int)(printHeight*printPPI);
   if (DEBUG) println("printWidth="+printWidth+" printHeight="+printHeight+" printAspectRatio="+printAspectRatio);
   if (DEBUG) println("printPxWidth="+printPxWidth+" printPxHeight="+printPxHeight);
+}
+
+/**
+ * Fill in Monitor object from configuration file
+ * when there is no configuration defined in json file, set monitor.status to false
+ * unless id == 1 main display
+ */
+Monitor getDisplayConfig(String name, Monitor monitor) {
+  JSONObject display;
+  try {
+    display = configFile.getJSONObject(name);
+    if (display != null) {
+      monitor.id = display.getInt("id");
+      monitor.screenWidth = display.getInt("width");
+      monitor.screenHeight = display.getInt("height");
+      monitor.AR = (float)auxDisplay.screenWidth/(float)auxDisplay.screenHeight;
+      try {
+        monitor.status = display.getBoolean("status");
+      }
+      catch (Exception ne) {
+        monitor.status = false;
+      }
+      String temp = display.getString("format");
+      if (temp != null) {
+        monitor.format = temp;
+      } else {
+        monitor.format = "2D";
+      }
+      if (DEBUG) println("display id="+ monitor.id + " format="+ monitor.format+
+        " status="+ monitor.status);
+      return monitor;
+    }
+  }
+  catch (Exception re) {
+    if (monitor.id == 1) monitor.status = true; else monitor.status = false;
+  }
+  return monitor;
 }
 
 // Check if file exists

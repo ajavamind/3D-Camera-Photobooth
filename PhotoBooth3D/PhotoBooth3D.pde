@@ -92,7 +92,7 @@ int messageTimeout;  // number of frames
 public void setup() {
   initConfig();  // read JSON configuration file my_config.json
   fullScreen(RENDERER, mainDisplay.id);  // photo booth main display on monitor 1
-  // debug renderer options
+  // debug renderer options only applies to main display 1
   //size(1080, 1920, RENDERER);  // for debug vertical monitor for portrait display, used with 2D camera
   //size(1920, 1080, RENDERER);  // matches monitor for landscape 3D
   //size(3840, 2160, RENDERER);  // for debug with 4K monitor

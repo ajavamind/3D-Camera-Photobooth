@@ -19,6 +19,7 @@
 		"id": 1,
 		"width": 1920,
 		"height": 1080,
+		"format": "2D",
 	},
 	"display2": {
 		"notes": "second monitor display2 is optional",
@@ -26,7 +27,9 @@
 		"format_description": "2D, 3D, 3DHW",
 		"format": "3DHW",
 		"id": 2,
-		"status": false,
+		"status": true,
+		"width_description": "1920  -- width when present overrides display hardware width",
+		"height_description": "1080  -- height when present overrides display hardware height",
 		"width": 1920,
 		"height": 1080,
 	},
