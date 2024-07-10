@@ -15,7 +15,7 @@ import java.util.Locale;
 private static final boolean DEBUG = true;
 private static final boolean DEBUGKEY = false;
 private static final boolean DEBUG_ONSCREEN = false;
-String VERSION = "3D 2.3";
+String VERSION = "2D/3D 2.4";
 
 Capture video;
 private final static int NUM_BUFFERS = 2;

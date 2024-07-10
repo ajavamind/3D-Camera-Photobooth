@@ -98,15 +98,15 @@ void mousePressed() {
       // print review photo
       lastKeyCode = KEYCODE_W; // print photo
     } else {
-      lastKeyCode = KEYCODE_LEFT_BRACKET; // Single Photo capture
+      lastKeyCode = KEYCODE_ENTER; //KEYCODE_LEFT_BRACKET; // Photo capture
     }
   } else if (button == CENTER) {
     lastKeyCode = KEYCODE_ESC;
   } else if (button == RIGHT) {
     if (camera3D) {
-      lastKeyCode = KEYCODE_A;  // anaglyph display
+      lastKeyCode = KEYCODE_A;  // toggle anaglyph live display
     } else {
-      lastKeyCode = KEYCODE_RIGHT_BRACKET;  // collage 2x2 capture
+      lastKeyCode = KEYCODE_RIGHT_BRACKET;  // toggle single or collage 2x2 modes
     }
   }
   if (DEBUGKEY) println("mousePressed "+button+" set lastKeyCode="+lastKeyCode);
@@ -251,13 +251,13 @@ int keyUpdate() {
     mirrorPrint = !mirrorPrint;
     if (DEBUG) println("mirrorPrint="+mirrorPrint);
     break;
-  case KEYCODE_C:  // collage 2D
+  case KEYCODE_C:  // set collage 2x2 photo panel mode
     if (!camera3D) {
       review = setLiveview();
       set2x2Photo();
     }
     break;
-  case KEYCODE_S:  // single photo 2D
+  case KEYCODE_S:  // set single photo panel mode
     review = setLiveview();
     setSinglePhoto();
     break;
@@ -286,26 +286,16 @@ int keyUpdate() {
       doubleTriggerDelay = doubleTriggerDelayMin;
     }
     break;
-  case KEYCODE_LEFT_BRACKET:  // single photo 2D
-    review = setLiveview();
-    setSinglePhoto();
-    if (!photoBoothController.isPhotoShoot) {
-      photoBoothController.tryPhotoShoot();
-    }
-    cmd = ENTER;
+  case KEYCODE_LEFT_BRACKET: 
     break;
-  case KEYCODE_RIGHT_BRACKET: // single photo 2D
+  case KEYCODE_RIGHT_BRACKET: // toggle photo panels or force 3D single panel
     review = setLiveview();
     if (camera3D) {
       setSinglePhoto();
     } else {
-      set2x2Photo();
+      togglePanelMode(); // flip between single and 2x2 photo capture panels
     }
-    if (!photoBoothController.isPhotoShoot) {
-      photoBoothController.tryPhotoShoot();
-    }
-    cmd = ENTER;
-    break;
+   break;
   case KEYCODE_P:  // portrait orientation
     if (!camera3D) {
       orientation = PORTRAIT;
@@ -366,7 +356,7 @@ int keyUpdate() {
           review = setLiveview();
         }
       } else {
-        if (numberOfPanels == 1 ) {
+        if (reviewNumberOfPanels == 1 ) {
           if (review > REVIEW) review = setLiveview();
         } else {  // 4 panels and collage
           if (review >= REVIEW_COLLAGE) {
@@ -405,7 +395,14 @@ int setLiveview() {
   }
 }
 
-
+// toggle between single photo and collage 2x2 panel mode captures
+void togglePanelMode() {
+  if (numberOfPanels == 1) {
+    set2x2Photo();
+  } else {
+    setSinglePhoto();
+  }
+}
 
 // Single Photo mode
 boolean setSinglePhoto() {

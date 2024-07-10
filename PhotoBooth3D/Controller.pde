@@ -286,7 +286,7 @@ class PhotoBoothController {
   }
 
   public void drawLast() {
-    if (numberOfPanels == 1) {
+    if (reviewNumberOfPanels == 1) {
       if (images[SBS] != null) {  // check that images have been saved for review
         if (camera3D) {
           draw3DreviewImage(images[review], review);
@@ -514,6 +514,7 @@ class PhotoBoothController {
       if (DEBUG) println("save 2D photo "+ (currentState+1) + " " + datetime);
       saveImage(images[currentState], currentState, OUTPUT_FOLDER_PATH, OUTPUT_FILENAME, datetime + "", fileType);
     }
+    reviewNumberOfPanels = numberOfPanels;
     currentState += 1;
     if (currentState >= numberOfPanels) {
       if (numberOfPanels == 4) {

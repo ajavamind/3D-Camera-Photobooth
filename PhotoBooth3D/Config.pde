@@ -107,6 +107,7 @@ int printPxHeight;
 float printPPI = 300.0;
 
 volatile int numberOfPanels = 1;
+int reviewNumberOfPanels = 1;
 boolean mirrorPrint = false;  // mirror photos saved for print by horizontal flip
 boolean mirror = true; // convert image to mirror image
 boolean saveRaw = false; // save original camera image capture without filter

@@ -10,9 +10,9 @@ L - Landscape mode
 T - Toggle Stereo Card mode for 6x4 print
 N - Toggle Mirror Prints
 U - Save Screenshot
-W - Print Review Photo
-[ - Start single photo capture
-] - Start 4 photo collage capture
+W - Print current Review mode Photo
+] - Toggle single or 2x2 panel modes
+
 MULTI REMOTE CAMERA CONTROLS:
 F - Focus Hold
 R - Focus Release
