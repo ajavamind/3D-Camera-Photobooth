@@ -47,7 +47,7 @@ private static final int REVIEW_ANAGLYPH = 1;  // saved Anaglyph image index
 private static final int REVIEW_LEFT = 2; // saved left image index
 private static final int REVIEW_RIGHT = 3; // saved right image index
 private static final int REVIEW_END = 4; // outside saved image index
-private static final int REVIEW_COLLAGE = 5;  // saved Collage 2D panel image index
+private static final int REVIEW_COLLAGE_END = 5;  // saved Collage 2D panel image index
 int review = LIVEVIEW; // default no review available yet, live view SBS
 
 // 3D output for stereo card format 6x4 print
@@ -489,6 +489,7 @@ void setEXIF(String filename) {
 
 // calls printPhoto.bat in the sketch path
 void printPhoto(String filenamePath) {
+  if (DEBUG) println("printPhoto "+filenamePath);
   if (filenamePath == null) return;
   if (DEBUG) println("process "+sketchPath() + File.separator + "printPhoto.bat "+ filenamePath);
   printFilePath = filenamePath;

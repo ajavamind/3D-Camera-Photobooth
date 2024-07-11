@@ -94,7 +94,10 @@ void mousePressed() {
   //if (legendPage >= 0 || showCameras|| review > LIVEVIEW) return;
   if (legendPage >= 0 || showCameras) return;
   if (button == LEFT) {  // remote key A
-    if (review >= REVIEW && review < REVIEW_END) {
+    if (review >= REVIEW && review < REVIEW_END && camera3D) {
+      // print review photo
+      lastKeyCode = KEYCODE_W; // print photo
+    } else if (review >= REVIEW && review <= REVIEW_END) {
       // print review photo
       lastKeyCode = KEYCODE_W; // print photo
     } else {
@@ -265,18 +268,27 @@ int keyUpdate() {
     screenshot = true;
     break;
   case KEYCODE_W:  // print file photo, must be in review mode
-    if (review == REVIEW) {
-      if (DEBUG) println("print "+ photoBoothController.getSbsFilename());
-      printPhoto(photoBoothController.getSbsFilename());
-    } else if (review == REVIEW_ANAGLYPH) {
-      if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
-      printPhoto(photoBoothController.getAnaglyphFilename());
-    } else if (review == REVIEW_LEFT) {
-      if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
-      printPhoto(photoBoothController.getLeftFilename());
-    } else if (review == REVIEW_RIGHT) {
-      if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
-      printPhoto(photoBoothController.getRightFilename());
+    if (camera3D) {
+      if (review == REVIEW) {
+        if (DEBUG) println("print "+ photoBoothController.getSbsFilename());
+        printPhoto(photoBoothController.getSbsFilename());
+      } else if (review == REVIEW_ANAGLYPH) {
+        if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
+        printPhoto(photoBoothController.getAnaglyphFilename());
+      } else if (review == REVIEW_LEFT) {
+        if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
+        printPhoto(photoBoothController.getLeftFilename());
+      } else if (review == REVIEW_RIGHT) {
+        if (DEBUG) println("print "+ photoBoothController.getAnaglyphFilename());
+        printPhoto(photoBoothController.getRightFilename());
+      }
+    } else {  // 2D review and collage
+      if (review >= REVIEW && review <= REVIEW_END) {
+        if (DEBUG) println("collage "+ review + " print "+ photoBoothController.collageFilename[review]);
+        printPhoto(photoBoothController.collageFilename[review]);
+      } else {
+        if (DEBUG) println("print photo request out of range " + review);
+      }
     }
     break;
   case KEYCODE_Y:  // double trigger delay time toggle
@@ -286,7 +298,7 @@ int keyUpdate() {
       doubleTriggerDelay = doubleTriggerDelayMin;
     }
     break;
-  case KEYCODE_LEFT_BRACKET: 
+  case KEYCODE_LEFT_BRACKET:
     break;
   case KEYCODE_RIGHT_BRACKET: // toggle photo panels or force 3D single panel
     review = setLiveview();
@@ -295,7 +307,7 @@ int keyUpdate() {
     } else {
       togglePanelMode(); // flip between single and 2x2 photo capture panels
     }
-   break;
+    break;
   case KEYCODE_P:  // portrait orientation
     if (!camera3D) {
       orientation = PORTRAIT;
@@ -359,14 +371,14 @@ int keyUpdate() {
         if (reviewNumberOfPanels == 1 ) {
           if (review > REVIEW) review = setLiveview();
         } else {  // 4 panels and collage
-          if (review >= REVIEW_COLLAGE) {
+          if (review >= REVIEW_COLLAGE_END) {
             review = setLiveview();
           }
         }
       }
-      //if (DEBUG) println("review="+review);
+      if (DEBUG) println("ESC key review="+review);
     } else {
-      //println("no image for preview");
+      //println("No images available for preview");
       setMessage("NO IMAGES", 3);
       review = setLiveview();
     }

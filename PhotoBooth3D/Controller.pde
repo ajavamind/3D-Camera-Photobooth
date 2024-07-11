@@ -22,7 +22,8 @@ class PhotoBoothController {
   String sbsFilename;
   String leftFilename;
   String rightFilename;
-
+  String[] collageFilename = new String[5];
+  
   volatile boolean isPhotoShoot;
   volatile boolean endPhotoShoot;
   volatile boolean noCountDown = false;
@@ -542,6 +543,7 @@ class PhotoBoothController {
     collage[index] = cropForPrint(img, printAspectRatio);  // adjusts for mirror
     filename = outputFolderPath + File.separator + outputFilename + suffix +"_"+ number(index+1) + "_cr"+ "." + filetype;
     collage[index].save(filename);
+    collageFilename[index] = filename;
     images[index] = collage[index];
     if (orientation == PORTRAIT) {
       setEXIF(filename);
@@ -915,6 +917,7 @@ class PhotoBoothController {
     pg.endDraw();
     String filename = outputFolderPath + File.separator + outputFilename + suffix + "_" + number(5) + "_cr"+ "." + filetype;
     pg.save(filename);
+    collageFilename[4] = filename;
     if (orientation == PORTRAIT) {
       setEXIF(filename);
     }
