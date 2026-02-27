@@ -104,8 +104,9 @@ The Buzzer box is a repurposed Bluetooth wireless mouse. The box has 3 contact s
 The switches connect to buttons in the wireless mouse.
 
 1) LEFT button: Start the countdown capture sequence to take a photo. In photo review mode this button sends a photo to the printer
-2) MIDDLE button: Toggle between live view and review of last captured photo in both SBS and Anaglyph display modes.
-3) RIGHT button: Toggle between Side-by-side or Anaglyph live view display of the subject. The Anaglyph view needs red-cyan glasses for viewing stereoscopically. This Anaglyph mode is very helpful for giving the subject a reference about where to position themselves in relation to the stereo window so they can pop out the window.
+2) MIDDLE button: Toggle between live view and review mode, showing the last captured photo in either SBS and Anaglyph display modes.
+3) RIGHT button: Toggle between Side-by-side or Anaglyph displays of the subject. The Anaglyph view needs red-cyan glasses for viewing stereoscopically.
+   This Anaglyph mode is very helpful to give the subject a reference about where to position themselves relative to the stereo window, so they can appear to pop out of the window.
 
 ### Lighting
 The 3D webcam works best with off camera lighting. A ring light has a camera support if desired, but recently I decided to use it as a separate light and place the camera on a tripod behind the monitor.
